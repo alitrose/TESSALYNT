@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}PDF Export Centre — Tessalynt{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <span class="badge" style="background:rgba(6,182,212,0.15);color:#67E8F9;border:1px solid rgba(6,182,212,0.3);">REPORTLAB ENGINE</span>
+      <span style="font-size: 0.8rem; color: var(--text-dim);">Print-Ready Publications</span>
+    </div>
+    <h1 class="page-title">Academic PDF Export Centre</h1>
+    <p class="page-subtitle">
+      Generate and download vector-rendered, publication-grade academic documents designed for print, distribution, and archival.
+    </p>
+  </div>
+
+  <!-- Document Specifications Banner -->
+  <div class="card" style="margin-bottom: 2.5rem; background: rgba(15, 23, 42, 0.7); border-color: rgba(6, 182, 212, 0.25);">
+    <h4 style="font-size: 1.05rem; margin-bottom: 0.75rem; color: #FFFFFF; display: flex; align-items: center; gap: 0.5rem;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      <span>Tessalynt Publishing Standards</span>
+    </h4>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+      <div>&bull; Standard ISO A4 Dimensions</div>
+      <div>&bull; Dynamic Two-Pass Page X of Y</div>
+      <div>&bull; Clean Margin Insets (0.5 in)</div>
+      <div>&bull; Tessalynt Running Headers</div>
+      <div>&bull; Auto Text-Flow & Table Wrapping</div>
+      <div>&bull; Vector Typography & Color Branding</div>
+    </div>
+  </div>
+
+  <!-- 5 Document Types Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+    
+    <!-- 1. Notes PDF -->
+    <div class="card card-interactive">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <span class="badge badge-primary">ACADEMIC NOTES</span>
+        <span style="font-size:0.75rem;color:var(--text-dim);">Multi-Page Book</span>
+      </div>
+      <h3 style="font-size:1.25rem;margin-bottom:0.5rem;color:#FFFFFF;">Complete Study Notes</h3>
+      <p style="font-size:0.875rem;margin-bottom:1.25rem;">
+        Full textbook chapter with 13 academic sections, clear typography, definitions, and university FAQs.
+      </p>
+      <div style="display:flex;gap:0.5rem;">
+        <a href="{{ url_for('notes_page') }}" class="btn btn-primary btn-sm">Generate Notes</a>
+      </div>
+    </div>
+
+    <!-- 2. Revision PDF -->
+    <div class="card card-interactive">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <span class="badge badge-warning">REVISION SPRINT</span>
+        <span style="font-size:0.75rem;color:var(--text-dim);">Dense Summary</span>
+      </div>
+      <h3 style="font-size:1.25rem;margin-bottom:0.5rem;color:#FFFFFF;">Quick Revision Sheet</h3>
+      <p style="font-size:0.875rem;margin-bottom:1.25rem;">
+        High-yield definitions, formula cheat sheets, common exam traps, and 5-minute memory checklists.
+      </p>
+      <div style="display:flex;gap:0.5rem;">
+        <a href="{{ url_for('revision_page') }}" class="btn btn-primary btn-sm" style="background:var(--warning);border-color:var(--warning);color:#000;">Generate Revision</a>
+      </div>
+    </div>
+
+    <!-- 3. MCQ Question Paper -->
+    <div class="card card-interactive">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <span class="badge badge-secondary">STUDENT PAPER</span>
+        <span style="font-size:0.75rem;color:var(--text-dim);">Clean Blind Test</span>
+      </div>
+      <h3 style="font-size:1.25rem;margin-bottom:0.5rem;color:#FFFFFF;">MCQ Question Paper</h3>
+      <p style="font-size:0.875rem;margin-bottom:1.25rem;">
+        Exam-hall ready question paper with candidate instructions and answer marking brackets [ &nbsp;&nbsp; ]. No answers revealed.
+      </p>
+      <div style="display:flex;gap:0.5rem;">
+        <a href="{{ url_for('mcq_page') }}" class="btn btn-primary btn-sm">Create Exam Paper</a>
+      </div>
+    </div>
+
+    <!-- 4. MCQ Answer Key -->
+    <div class="card card-interactive">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <span class="badge badge-success">SOLUTIONS MANUAL</span>
+        <span style="font-size:0.75rem;color:var(--text-dim);">With Rationale</span>
+      </div>
+      <h3 style="font-size:1.25rem;margin-bottom:0.5rem;color:#FFFFFF;">MCQ Answer Key & Explanations</h3>
+      <p style="font-size:0.875rem;margin-bottom:1.25rem;">
+        Complete examiner solutions guide featuring a top quick-scoring answer matrix and detailed step-by-step rationales.
+      </p>
+      <div style="display:flex;gap:0.5rem;">
+        <a href="{{ url_for('mcq_page') }}" class="btn btn-primary btn-sm" style="background:var(--success);border-color:var(--success);">Create Solutions Key</a>
+      </div>
+    </div>
+
+    <!-- 5. Flashcards Collection -->
+    <div class="card card-interactive">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <span class="badge" style="background:rgba(244,63,94,0.15);color:#FDA4AF;border:1px solid rgba(244,63,94,0.3);">FLASHCARD DECK</span>
+        <span style="font-size:0.75rem;color:var(--text-dim);">Print-Ready Grid</span>
+      </div>
+      <h3 style="font-size:1.25rem;margin-bottom:0.5rem;color:#FFFFFF;">Flashcard Collections</h3>
+      <p style="font-size:0.875rem;margin-bottom:1.25rem;">
+        Structured printable study cards with prominent question prompts on top and detailed solutions below.
+      </p>
+      <div style="display:flex;gap:0.5rem;">
+        <a href="{{ url_for('flashcards_page') }}" class="btn btn-primary btn-sm">Build Flashcard Deck</a>
+      </div>
+    </div>
+
+    <!-- Library Archive Link -->
+    <div class="card card-interactive" style="border-style:dashed;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <span class="badge" style="background:rgba(255,255,255,0.06);color:#CBD5E1;">ARCHIVE</span>
+      </div>
+      <h3 style="font-size:1.25rem;margin-bottom:0.5rem;color:#FFFFFF;">Download from Library</h3>
+      <p style="font-size:0.875rem;margin-bottom:1.25rem;">
+        Already generated study materials? Access and export any previously saved notes or quizzes at any time.
+      </p>
+      <div>
+        <a href="{{ url_for('library_page') }}" class="btn btn-secondary btn-sm">Browse Saved Materials &rarr;</a>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}AI Academic Notes Generator — Tessalynt{% endblock %}
+
+{% block content %}
+<div class="container container-narrow" style="padding-top: 2rem; padding-bottom: 4rem;">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <span class="badge badge-primary">ACADEMIC ENGINE</span>
+      <span style="font-size: 0.8rem; color: var(--text-dim);">13-Section Standard</span>
+    </div>
+    <h1 class="page-title">AI Academic Notes Generator</h1>
+    <p class="page-subtitle">
+      Generate comprehensive, syllabus-tailored study notes formatted for college and university examinations.
+    </p>
+  </div>
+
+  <!-- Input Form Card -->
+  <div class="card">
+    <form id="notesForm">
+      
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="degreeStream">Degree / Stream <span class="required">*</span></label>
+          <input type="text" id="degreeStream" class="form-control" placeholder="e.g. B.Tech, B.Sc, BCA, MBBS, M.Tech" required value="B.Tech">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="department">Department / Major</label>
+          <input type="text" id="department" class="form-control" placeholder="e.g. Computer Science, Mechanical, Biology" value="Computer Science & Engineering">
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="academicYear">Academic Year</label>
+          <select id="academicYear" class="form-control">
+            <option value="1st Year">1st Year</option>
+            <option value="2nd Year">2nd Year</option>
+            <option value="3rd Year" selected>3rd Year</option>
+            <option value="4th Year">4th Year</option>
+            <option value="Postgraduate">Postgraduate</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="semester">Semester</label>
+          <select id="semester" class="form-control">
+            <option value="Semester 1">Semester 1</option>
+            <option value="Semester 2">Semester 2</option>
+            <option value="Semester 3">Semester 3</option>
+            <option value="Semester 4">Semester 4</option>
+            <option value="Semester 5" selected>Semester 5</option>
+            <option value="Semester 6">Semester 6</option>
+            <option value="Semester 7">Semester 7</option>
+            <option value="Semester 8">Semester 8</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="subject">Subject Name <span class="required">*</span></label>
+          <input type="text" id="subject" class="form-control" placeholder="e.g. Operating Systems, Data Structures, Macroeconomics" required value="Operating Systems">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="topic">Topic / Unit <span class="required">*</span></label>
+          <input type="text" id="topic" class="form-control" placeholder="e.g. Virtual Memory and Paging Algorithms" required value="Virtual Memory and Paging">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="instructions">Additional Instructions (Optional)</label>
+        <textarea id="instructions" class="form-control" rows="2" placeholder="e.g. Emphasize university exam questions, include page replacement algorithm comparisons, and give clear analogies."></textarea>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+        <button type="submit" class="btn btn-primary btn-lg" id="generateNotesBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <span>Generate Study Notes</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading Box -->
+  <div class="loading-box" id="notesLoading">
+    <div class="spinner"></div>
+    <h3 style="font-size: 1.25rem; color: #FFFFFF; margin-bottom: 0.5rem;">Synthesizing Academic Notes...</h3>
+    <p style="font-size: 0.875rem; color: var(--text-muted); max-width: 440px; margin: 0 auto;">
+      Google Gemini is structuring your notes through 13 standardized academic dimensions, definitions, principles, and university FAQs.
+    </p>
+  </div>
+
+  <!-- Generated Output Card -->
+  <div class="output-card card" id="notesOutput">
+    <div class="output-toolbar">
+      <div class="output-title-wrap">
+        <h3 id="notesDocTitle">Generated Notes</h3>
+        <p style="font-size: 0.8rem; color: var(--text-muted);" id="notesDocMeta">Subject • Topic</p>
+      </div>
+
+      <div class="output-actions">
+        <button type="button" class="btn btn-secondary btn-sm" id="copyNotesBtn" title="Copy to Clipboard">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          <span>Copy</span>
+        </button>
+
+        <button type="button" class="btn btn-secondary btn-sm" id="txtNotesBtn" title="Download Plain Text">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>TXT</span>
+        </button>
+
+        <button type="button" class="btn btn-primary btn-sm" id="pdfNotesBtn" title="Download ReportLab PDF">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          <span>PDF Export</span>
+        </button>
+
+        <button type="button" class="btn btn-ghost btn-sm" id="printNotesBtn" title="Print document">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          <span>Print</span>
+        </button>
+
+        <button type="button" class="btn btn-ghost btn-sm" id="regenNotesBtn" title="Regenerate notes">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          <span>Regenerate</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Rendered Markdown Body -->
+    <div class="rendered-content" id="renderedNotes"></div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/notes.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}About Tessalynt — Learn beyond limits{% endblock %}
+
+{% block content %}
+<div class="container container-narrow" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+
+  <!-- Page Header -->
+  <div class="page-header" style="text-align: center;">
+    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Tessalynt" style="height: 52px; margin-bottom: 1.25rem;">
+    <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Learn Beyond Limits.</h1>
+    <p style="font-size: 1.15rem; color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+      The AI-powered personalized learning platform engineered for deep university comprehension, rapid exam revision, and active recall.
+    </p>
+  </div>
+
+  <!-- Origin Story Card -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+      <span class="badge badge-primary">THE ORIGIN STORY</span>
+      <span style="font-size: 0.8rem; color: var(--text-dim);">Google Workshop Evolution</span>
+    </div>
+    <h2 style="font-size: 1.6rem; margin-bottom: 1rem; color: #FFFFFF;">From a Workshop Prototype to an Academic Ecosystem</h2>
+    <p style="margin-bottom: 1rem; line-height: 1.7;">
+      Tessalynt began as an experimental AI Notes Generator developed during an intensive <strong>Google Generative AI Workshop</strong>. What originated as a lightweight Flask script that tested large language model prompt completions has evolved into a comprehensive, production-grade learning suite.
+    </p>
+    <p style="line-height: 1.7;">
+      Recognizing that students need more than unstructured text walls, Tessalynt was redesigned around cognitive pedagogy: mapping academic streams to accredited textbook outlines, generating blind multiple-choice exams for diagnostic evaluation, employing active-recall 3D flashcards, and generating vector-sharp ReportLab academic PDFs.
+    </p>
+  </div>
+
+  <!-- Brand Identity & Logo Philosophy -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+      <span class="badge badge-secondary">BRAND IDENTITY</span>
+      <span style="font-size: 0.8rem; color: var(--text-dim);">Cognitive Aesthetics</span>
+    </div>
+    <h2 style="font-size: 1.6rem; margin-bottom: 1rem; color: #FFFFFF;">The Tessalynt Emblem</h2>
+    <div style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 1rem;">
+      <img src="{{ url_for('static', filename='images/logo-icon.svg') }}" alt="Tessalynt Icon" style="width: 90px; height: 90px; flex-shrink: 0;">
+      <div style="flex: 1; min-width: 260px;">
+        <p style="line-height: 1.7;">
+          The custom Tessalynt logo unifies three fundamental pillars of modern education:
+        </p>
+        <ul style="margin: 0.75rem 0 0 1.25rem; line-height: 1.7; color: #CBD5E1;">
+          <li><strong>The Open Book:</strong> Foundational human knowledge, academic textbooks, and accredited syllabi.</li>
+          <li><strong>The Neural Synapses:</strong> Deep artificial intelligence, generative language models, and adaptive connections.</li>
+          <li><strong>The Apex Spark:</strong> Enlightenment, critical reasoning, and learning beyond traditional boundaries.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technical Architecture -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+      <span class="badge badge-success">ARCHITECTURE</span>
+      <span style="font-size: 0.8rem; color: var(--text-dim);">Modern Python Stack</span>
+    </div>
+    <h2 style="font-size: 1.6rem; margin-bottom: 1rem; color: #FFFFFF;">Built with Industrial Modernity</h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 1.25rem;">
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem;">
+        <h4 style="color: #A5B4FC; margin-bottom: 0.25rem;">Google Gemini AI</h4>
+        <p style="font-size: 0.85rem;">Multi-tier fallback cascading across Gemini 2.5 Flash, 2.0 Flash, and 1.5 Pro with prompt engineering.</p>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem;">
+        <h4 style="color: #F59E0B; margin-bottom: 0.25rem;">Python & Flask</h4>
+        <p style="font-size: 0.85rem;">Modular service layer architecture separating AI synthesis, database operations, and PDF compiling.</p>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem;">
+        <h4 style="color: #67E8F9; margin-bottom: 0.25rem;">ReportLab Publishing</h4>
+        <p style="font-size: 0.85rem;">Two-pass dynamic canvas rendering A4 vector documents with custom running headers and page numbers.</p>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem;">
+        <h4 style="color: #C084FC; margin-bottom: 0.25rem;">Private SQLite Archive</h4>
+        <p style="font-size: 0.85rem;">Session-isolated local database securing student study notes and quiz performance.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security & Privacy -->
+  <div class="card">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+      <span class="badge badge-warning">PRIVACY FIRST</span>
+    </div>
+    <h2 style="font-size: 1.6rem; margin-bottom: 1rem; color: #FFFFFF;">Security & Key Management</h2>
+    <p style="line-height: 1.7; margin-bottom: 1rem;">
+      In accordance with secure API practices, Tessalynt strictly isolates secrets. API credentials are never bundled into client-side code or exposed publicly. Users can configure keys locally via <code>.env</code> or session memory.
+    </p>
+    <div style="display: flex; gap: 0.75rem;">
+      <a href="{{ url_for('notes_page') }}" class="btn btn-primary btn-sm">Explore Platform</a>
+      <a href="#" class="btn btn-secondary btn-sm open-settings-modal">Configure API Key</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

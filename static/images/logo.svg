@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 110" fill="none">
+  <defs>
+    <linearGradient id="bookGradFull" x1="10" y1="85" x2="100" y2="35" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="50%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="neuralGradFull" x1="30" y1="20" x2="80" y2="65" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="50%" stop-color="#818CF8"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+    <linearGradient id="sparkGradFull" x1="45" y1="8" x2="65" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#818CF8"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="115" y1="40" x2="360" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="#F1F5F9"/>
+      <stop offset="100%" stop-color="#A5B4FC"/>
+    </linearGradient>
+    <linearGradient id="tagGrad" x1="120" y1="78" x2="320" y2="78" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="50%" stop-color="#818CF8"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+    <filter id="logoGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- ICON GROUP (Scaled & Centered around x=52, y=55) -->
+  <g transform="translate(4, 5) scale(0.9)">
+    <!-- Book Pages -->
+    <path d="M55 86C45 80 30 78 15 82C13.8 82.3 13 83.3 13 84.5V48C13 46.8 14 45.9 15.2 45.6C30 42 45 44 55 50V86Z" 
+          fill="url(#bookGradFull)" fill-opacity="0.9" stroke="#818CF8" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M55 86C65 80 80 78 95 82C96.2 82.3 97 83.3 97 84.5V48C97 46.8 96 45.9 94.8 45.6C80 42 65 44 55 50V86Z" 
+          fill="url(#bookGradFull)" fill-opacity="0.95" stroke="#A78BFA" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M55 50V86" stroke="#E0E7FF" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Neural lines -->
+    <path d="M55 50L38 33M55 50L72 33M38 33L55 17M72 33L55 17M38 33L22 27M72 33L88 27" 
+          stroke="url(#neuralGradFull)" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="3 3"/>
+
+    <!-- Nodes -->
+    <circle cx="22" cy="27" r="3.2" fill="#38BDF8" filter="url(#logoGlow)"/>
+    <circle cx="88" cy="27" r="3.2" fill="#C084FC" filter="url(#logoGlow)"/>
+    <circle cx="38" cy="33" r="4.2" fill="#6366F1" stroke="#FFFFFF" stroke-width="1.2"/>
+    <circle cx="72" cy="33" r="4.2" fill="#8B5CF6" stroke="#FFFFFF" stroke-width="1.2"/>
+
+    <!-- Apex Spark -->
+    <path d="M55 9L58.5 16.5L66 20L58.5 23.5L55 31L51.5 23.5L44 20L51.5 16.5Z" 
+          fill="url(#sparkGradFull)" filter="url(#logoGlow)"/>
+    <circle cx="55" cy="20" r="1.8" fill="#FFFFFF"/>
+  </g>
+
+  <!-- BRAND NAME: TESSALYNT -->
+  <text x="112" y="58" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="800" letter-spacing="4" fill="url(#textGrad)">
+    TESSALYNT
+  </text>
+
+  <!-- TAGLINE: Learn beyond limits. -->
+  <text x="114" y="84" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14.5" font-weight="600" letter-spacing="2.8" fill="url(#tagGrad)">
+    LEARN BEYOND LIMITS.
+  </text>
+</svg>

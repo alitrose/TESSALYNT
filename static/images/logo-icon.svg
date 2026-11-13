@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="bookGrad" x1="10" y1="90" x2="110" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="50%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="neuralGrad" x1="30" y1="20" x2="90" y2="70" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="50%" stop-color="#818CF8"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+    <linearGradient id="sparkGrad" x1="50" y1="10" x2="70" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#818CF8"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background Subtle Aura -->
+  <circle cx="60" cy="60" r="46" fill="#6366F1" fill-opacity="0.08" filter="url(#glow)"/>
+
+  <!-- Left Open Book Page -->
+  <path d="M60 88C50 82 34 80 18 84C16.8 84.3 16 85.3 16 86.5V50C16 48.8 17 47.9 18.2 47.6C34 44 50 46 60 52V88Z" 
+        fill="url(#bookGrad)" fill-opacity="0.9" stroke="#818CF8" stroke-width="1.5" stroke-linejoin="round"/>
+  
+  <!-- Right Open Book Page -->
+  <path d="M60 88C70 82 86 80 102 84C103.2 84.3 104 85.3 104 86.5V50C104 48.8 103 47.9 101.8 47.6C86 44 70 46 60 52V88Z" 
+        fill="url(#bookGrad)" fill-opacity="0.95" stroke="#A78BFA" stroke-width="1.5" stroke-linejoin="round"/>
+
+  <!-- Book Spine Central Highlight -->
+  <path d="M60 52V88" stroke="#E0E7FF" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Neural Network Synaptic Connections -->
+  <path d="M60 52L42 34M60 52L78 34M42 34L60 18M78 34L60 18M42 34L26 28M78 34L94 28M60 18V30" 
+        stroke="url(#neuralGrad)" stroke-width="1.75" stroke-linecap="round" stroke-dasharray="3 3"/>
+
+  <!-- Neural Nodes -->
+  <circle cx="26" cy="28" r="3.5" fill="#38BDF8" filter="url(#glow)"/>
+  <circle cx="94" cy="28" r="3.5" fill="#C084FC" filter="url(#glow)"/>
+  <circle cx="42" cy="34" r="4.5" fill="#6366F1" stroke="#FFFFFF" stroke-width="1.2"/>
+  <circle cx="78" cy="34" r="4.5" fill="#8B5CF6" stroke="#FFFFFF" stroke-width="1.2"/>
+  <circle cx="60" cy="36" r="3" fill="#38BDF8"/>
+
+  <!-- Apex Knowledge Spark (Star/Diamond) -->
+  <path d="M60 10L63.5 17.5L71 21L63.5 24.5L60 32L56.5 24.5L49 21L56.5 17.5Z" 
+        fill="url(#sparkGrad)" filter="url(#glow)"/>
+  <circle cx="60" cy="21" r="2" fill="#FFFFFF"/>
+</svg>

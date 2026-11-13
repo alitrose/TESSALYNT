@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="favBookGrad" x1="5" y1="50" x2="59" y2="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="50%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="favNeural" x1="16" y1="10" x2="48" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#0B0F19"/>
+  <!-- Book -->
+  <path d="M32 48C26 44 17 43 9 45V24C17 21 26 22 32 26V48Z" fill="url(#favBookGrad)" stroke="#818CF8" stroke-width="1"/>
+  <path d="M32 48C38 44 47 43 55 45V24C47 21 38 22 32 26V48Z" fill="url(#favBookGrad)" stroke="#A78BFA" stroke-width="1"/>
+  <path d="M32 26V48" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Neural + Spark -->
+  <path d="M32 26L22 17M32 26L42 17M22 17L32 8M42 17L32 8" stroke="url(#favNeural)" stroke-width="1.2" stroke-dasharray="2 2"/>
+  <circle cx="22" cy="17" r="2.5" fill="#38BDF8"/>
+  <circle cx="42" cy="17" r="2.5" fill="#C084FC"/>
+  <!-- Star -->
+  <path d="M32 5L34 9L38 11L34 13L32 17L30 13L26 11L30 9Z" fill="#FFFFFF"/>
+</svg>

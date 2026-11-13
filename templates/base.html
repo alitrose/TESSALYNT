@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Tessalynt — Learn beyond limits{% endblock %}</title>
+  <meta name="description" content="Tessalynt is an AI-powered personalized learning platform that helps students generate academic notes, revise subjects, practice MCQs, and export publication-grade PDFs.">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="{{ url_for('index') }}" class="brand-link">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Tessalynt Logo" class="brand-logo-img">
+      </a>
+
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="{{ url_for('dashboard') }}" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">Dashboard</a></li>
+        <li><a href="{{ url_for('notes_page') }}" class="nav-link {% if request.path == '/notes' %}active{% endif %}">AI Notes</a></li>
+        <li><a href="{{ url_for('revision_page') }}" class="nav-link {% if request.path == '/revision' %}active{% endif %}">Quick Revision</a></li>
+        <li><a href="{{ url_for('mcq_page') }}" class="nav-link {% if request.path == '/mcq' %}active{% endif %}">MCQ Quiz</a></li>
+        <li><a href="{{ url_for('flashcards_page') }}" class="nav-link {% if request.path == '/flashcards' %}active{% endif %}">Flashcards</a></li>
+        <li><a href="{{ url_for('library_page') }}" class="nav-link {% if request.path == '/library' %}active{% endif %}">Library</a></li>
+        <li><a href="{{ url_for('pdf_centre_page') }}" class="nav-link {% if request.path == '/pdf-centre' %}active{% endif %}">PDF Export</a></li>
+        <li><a href="{{ url_for('about_page') }}" class="nav-link {% if request.path == '/about' %}active{% endif %}">About</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <!-- API Status Indicator & Settings Trigger -->
+        <button type="button" class="api-status-badge open-settings-modal" id="apiStatusBadge" title="Click to view or set Gemini API Key">
+          <span class="status-indicator-dot"></span>
+          <span id="apiStatusText">Checking AI...</span>
+        </button>
+
+        <a href="{{ url_for('notes_page') }}" class="btn btn-primary btn-sm">
+          <span>Start Learning</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </a>
+
+        <button class="nav-toggle-btn" id="navToggle" aria-label="Toggle navigation">
+          &#9776;
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="site-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Tessalynt" style="height:34px;margin-bottom:1rem;">
+          <p style="font-size:0.875rem;max-width:320px;line-height:1.6;">
+            AI-powered personalized learning platform engineered for deep comprehension, university exam success, and effortless retention.
+          </p>
+          <div style="margin-top:1.25rem;">
+            <span class="badge badge-primary">Google GenAI Powered</span>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Platform Tools</h4>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('notes_page') }}">AI Notes Generator</a></li>
+            <li><a href="{{ url_for('revision_page') }}">Quick Revision Notes</a></li>
+            <li><a href="{{ url_for('mcq_page') }}">Interactive MCQ Quizzes</a></li>
+            <li><a href="{{ url_for('flashcards_page') }}">3D Flashcards</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('library_page') }}">Study Materials Library</a></li>
+            <li><a href="{{ url_for('pdf_centre_page') }}">PDF Export Studio</a></li>
+            <li><a href="{{ url_for('about_page') }}">About & Journey</a></li>
+            <li><a href="#" class="open-settings-modal">API Key Settings</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Philosophy</h4>
+          <ul class="footer-links">
+            <li><span style="color:#CBD5E1;font-size:0.875rem;">“Learn beyond limits.”</span></li>
+            <li><span style="color:var(--text-dim);font-size:0.8rem;">Developed from the Google Generative AI Workshop initiative.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; {{ year }} Tessalynt Inc. All rights reserved.</div>
+        <div style="display:flex;gap:1.5rem;">
+          <span>Flask &bull; Google Gemini &bull; ReportLab</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Settings & API Key Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size:1.25rem;color:#FFFFFF;margin-bottom:0.25rem;">Gemini AI Settings</h3>
+          <p style="font-size:0.85rem;color:var(--text-muted);">Configure your Google Gemini API key securely</p>
+        </div>
+        <button class="modal-close-btn" id="closeSettingsModal">&times;</button>
+      </div>
+
+      <div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.25);border-radius:var(--radius-md);padding:1rem;margin-bottom:1.25rem;font-size:0.85rem;color:#E0E7FF;">
+        <strong>How your key is stored:</strong><br>
+        You can store <code>GEMINI_API_KEY=your_key</code> in your local <code>.env</code> file, or enter it here for temporary browser session usage. Your key is never shared or stored in client-side code.
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="settingsApiKeyInput">Gemini API Key</label>
+        <input type="password" id="settingsApiKeyInput" class="form-control" placeholder="AIzaSy...">
+        <div style="font-size:0.775rem;color:var(--text-dim);margin-top:0.4rem;">
+          Need a key? Get one free at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>.
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1.5rem;">
+        <button type="button" class="btn btn-ghost btn-sm" id="clearKeyBtn" style="color:var(--danger);">Clear Session Key</button>
+        <button type="button" class="btn btn-primary" id="saveKeyBtn">Save & Verify</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

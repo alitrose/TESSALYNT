@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Tessalynt — AI-Powered Personalized Learning Platform{% endblock %}
+
+{% block content %}
+<!-- HERO SECTION -->
+<section style="padding: 5rem 0 4rem; position: relative; overflow: hidden;">
+  <div class="container" style="text-align: center; position: relative; z-index: 2;">
+    
+    <div style="display:inline-flex;align-items:center;gap:0.5rem;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);padding:0.4rem 1rem;border-radius:9999px;margin-bottom:1.75rem;">
+      <span style="width:8px;height:8px;border-radius:50%;background:#38BDF8;display:inline-block;box-shadow:0 0 8px #38BDF8;"></span>
+      <span style="font-size:0.825rem;font-weight:600;color:#A5B4FC;letter-spacing:0.04em;">NEXT-GEN ACADEMIC COGNITION</span>
+    </div>
+
+    <h1 style="font-size: clamp(2.5rem, 5.5vw, 4.25rem); font-weight: 900; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 1.25rem; max-width: 960px; margin-left: auto; margin-right: auto;">
+      Master Any University Subject. <br>
+      <span class="gradient-text">Learn Beyond Limits.</span>
+    </h1>
+
+    <p style="font-size: clamp(1.05rem, 2vw, 1.25rem); color: var(--text-muted); max-width: 740px; margin: 0 auto 2.5rem; line-height: 1.6;">
+      Tessalynt transforms complex curriculums into exhaustive university-grade study notes, rapid exam revision sheets, interactive MCQs, and 3D flashcards — backed by Google Gemini AI.
+    </p>
+
+    <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+      <a href="{{ url_for('notes_page') }}" class="btn btn-primary btn-lg">
+        <span>Start Generating Notes</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </a>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-lg">
+        <span>Open Student Dashboard</span>
+      </a>
+    </div>
+
+    <!-- Quick Stat Badges -->
+    <div style="display: flex; align-items: center; justify-content: center; gap: 2.5rem; margin-top: 3.5rem; flex-wrap: wrap;">
+      <div style="text-align: left;">
+        <div style="font-size: 1.4rem; font-weight: 800; color: #FFFFFF;">13 Sections</div>
+        <div style="font-size: 0.825rem; color: var(--text-muted);">Standard Academic Structure</div>
+      </div>
+      <div style="width: 1px; height: 32px; background: var(--border-subtle);"></div>
+      <div style="text-align: left;">
+        <div style="font-size: 1.4rem; font-weight: 800; color: #FFFFFF;">Publication-Grade</div>
+        <div style="font-size: 0.825rem; color: var(--text-muted);">ReportLab Vector PDFs</div>
+      </div>
+      <div style="width: 1px; height: 32px; background: var(--border-subtle);"></div>
+      <div style="text-align: left;">
+        <div style="font-size: 1.4rem; font-weight: 800; color: #FFFFFF;">100% Private</div>
+        <div style="font-size: 0.825rem; color: var(--text-muted);">Session-Isolated Storage</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FEATURE SUITE HIGHLIGHTS -->
+<section style="padding: 4rem 0; border-top: 1px solid var(--border-subtle);">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 3.5rem;">
+      <span class="badge badge-secondary" style="margin-bottom: 0.75rem;">THE TESSALYNT ECOSYSTEM</span>
+      <h2 style="font-size: 2.3rem;">Engineered for University Academic Excellence</h2>
+      <p style="max-width: 620px; margin: 0.5rem auto 0;">Every tool is intentionally tailored for collegiate syllabi, semester exams, and cognitive recall.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+      
+      <!-- Feature 1: Notes -->
+      <div class="card card-interactive">
+        <div style="width: 46px; height: 46px; border-radius: var(--radius-md); background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Exhaustive Academic Notes</h3>
+        <p style="font-size: 0.925rem; margin-bottom: 1.25rem;">
+          Generates comprehensive study materials mapped to your specific Degree, Stream, Year, and Semester across 13 textbook-aligned sections.
+        </p>
+        <a href="{{ url_for('notes_page') }}" style="font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+          Generate Notes &rarr;
+        </a>
+      </div>
+
+      <!-- Feature 2: Quick Revision -->
+      <div class="card card-interactive">
+        <div style="width: 46px; height: 46px; border-radius: var(--radius-md); background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Quick Revision Sprint</h3>
+        <p style="font-size: 0.925rem; margin-bottom: 1.25rem;">
+          Last-minute review sheets featuring high-yield definitions, formula cheat-sheets, common exam traps, and 5-minute memory checklists.
+        </p>
+        <a href="{{ url_for('revision_page') }}" style="font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; color:#F59E0B;">
+          Review Key Points &rarr;
+        </a>
+      </div>
+
+      <!-- Feature 3: MCQ Quizzes -->
+      <div class="card card-interactive">
+        <div style="width: 46px; height: 46px; border-radius: var(--radius-md); background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C084FC" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Smart MCQ Assessments</h3>
+        <p style="font-size: 0.925rem; margin-bottom: 1.25rem;">
+          Adaptive multiple-choice exams with hidden answers during tests, real-time score grading, detailed step-by-step rationales, and dual-PDF exports.
+        </p>
+        <a href="{{ url_for('mcq_page') }}" style="font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; color:#C084FC;">
+          Practice MCQs &rarr;
+        </a>
+      </div>
+
+      <!-- Feature 4: 3D Flashcards -->
+      <div class="card card-interactive">
+        <div style="width: 46px; height: 46px; border-radius: var(--radius-md); background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path></svg>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Interactive 3D Flashcards</h3>
+        <p style="font-size: 0.925rem; margin-bottom: 1.25rem;">
+          Active-recall flashcards with smooth 3D flip physics, keyboard navigation, shuffle capability, and spaced-retention status tagging.
+        </p>
+        <a href="{{ url_for('flashcards_page') }}" style="font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; color:#10B981;">
+          Flip Flashcards &rarr;
+        </a>
+      </div>
+
+      <!-- Feature 5: PDF Centre -->
+      <div class="card card-interactive">
+        <div style="width: 46px; height: 46px; border-radius: var(--radius-md); background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.3); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">PDF Export Centre</h3>
+        <p style="font-size: 0.925rem; margin-bottom: 1.25rem;">
+          Produces clean, print-ready A4 PDFs complete with two-pass page numbers, running headers, and formatted tables using ReportLab.
+        </p>
+        <a href="{{ url_for('pdf_centre_page') }}" style="font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; color:#06B6D4;">
+          Export Studio &rarr;
+        </a>
+      </div>
+
+      <!-- Feature 6: Study Library -->
+      <div class="card card-interactive">
+        <div style="width: 46px; height: 46px; border-radius: var(--radius-md); background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F43F5E" stroke-width="2"><path d="m16 6 4 14"></path><path d="M12 6v14"></path><path d="M8 8v12"></path><path d="M4 4v16"></path></svg>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Study Materials Library</h3>
+        <p style="font-size: 0.925rem; margin-bottom: 1.25rem;">
+          All generated materials are automatically archived locally with search, category filtering, instant re-opening, and private isolation.
+        </p>
+        <a href="{{ url_for('library_page') }}" style="font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; color:#F43F5E;">
+          Browse Library &rarr;
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS SECTION -->
+<section style="padding: 4.5rem 0; background: rgba(7, 10, 18, 0.6); border-top: 1px solid var(--border-subtle);">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 3.5rem;">
+      <span class="badge badge-primary" style="margin-bottom: 0.75rem;">SEAMLESS WORKFLOW</span>
+      <h2 style="font-size: 2.3rem;">How Tessalynt Accelerates Your Study</h2>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+      <div class="card">
+        <div style="font-size: 2.5rem; font-weight: 900; color: rgba(99, 102, 241, 0.3); margin-bottom: 0.75rem;">01</div>
+        <h4 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Specify Your Academic Context</h4>
+        <p style="font-size: 0.9rem;">Input your degree, department, semester, subject, and topic. The engine calibrates tone, depth, and syllabus requirements.</p>
+      </div>
+
+      <div class="card">
+        <div style="font-size: 2.5rem; font-weight: 900; color: rgba(139, 92, 246, 0.3); margin-bottom: 0.75rem;">02</div>
+        <h4 style="font-size: 1.15rem; margin-bottom: 0.5rem;">AI Cognitive Synthesis</h4>
+        <p style="font-size: 0.9rem;">Google Gemini structures the output into pedagogical frameworks: 13-part notes, revision cheat-sheets, MCQs, or flashcards.</p>
+      </div>
+
+      <div class="card">
+        <div style="font-size: 2.5rem; font-weight: 900; color: rgba(6, 182, 212, 0.3); margin-bottom: 0.75rem;">03</div>
+        <h4 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Revise, Practice & Export</h4>
+        <p style="font-size: 0.9rem;">Test knowledge with interactive quizzes, review flashcards, save to your library, and export publication-ready PDFs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CALL TO ACTION -->
+<section style="padding: 5rem 0;">
+  <div class="container text-center" style="text-align: center;">
+    <div class="card" style="max-width: 840px; margin: 0 auto; padding: 3.5rem 2rem; background: linear-gradient(135deg, rgba(30,27,75,0.7) 0%, rgba(15,23,42,0.9) 100%); border-color: rgba(99,102,241,0.4);">
+      <h2 style="font-size: 2.4rem; margin-bottom: 1rem;">Ready to upgrade your study workflow?</h2>
+      <p style="max-width: 560px; margin: 0 auto 2rem; font-size: 1.05rem;">
+        Generate your first academic note or revision sheet in seconds. No complex registration required.
+      </p>
+      <a href="{{ url_for('notes_page') }}" class="btn btn-primary btn-lg">
+        <span>Get Started with Tessalynt</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

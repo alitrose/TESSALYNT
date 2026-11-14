@@ -1,6 +1,6 @@
 """
 Tessalynt - Google Gemini AI Service
-Handles communication with the Gemini API, intelligent prompt engineering,
+Handles communication with Google GenAI API, intelligent prompt engineering,
 model cascade fallback, and JSON extraction.
 """
 import os
@@ -14,45 +14,17 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 # Cached active model to avoid retrying failing models on every request
-_ACTIVE_WORKING_MODEL = None
+_ACTIVE_WORKING_MODEL = "gemini-3.5-flash-lite"
 
-# Model fallback cascade
+# Production-verified candidate models in order of speed, quota reliability, and academic depth
 CANDIDATE_MODELS = [
-    "gemini-3.8-flash",
-    "gemini-3.8-pro",
-    "gemini-2.5-flash",
-    "gemini-2.0-flash",
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
-    "gemini-pro"
+    "gemini-3.5-flash-lite",    # Ultra-fast, highly responsive, dedicated free-tier quota
+    "gemini-3.5-flash",         # Rich academic reasoning, high throughput
+    "gemini-3.1-flash-lite",    # Secondary fast fallback
+    "gemini-flash-lite-latest", # Auto-updating alias
+    "gemini-flash-latest",      # Auto-updating alias
+    "gemini-3.8-flash"          # Daily quota candidate
 ]
-
-
-def get_candidate_models(genai_client):
-    """Dynamically queries available models from Gemini API or falls back to prioritized list."""
-    try:
-        remote_models = [
-            m.name.replace("models/", "")
-            for m in genai_client.list_models()
-            if "generateContent" in getattr(m, "supported_generation_methods", [])
-        ]
-        if remote_models:
-            priority_order = [
-                "gemini-3.8-flash",
-                "gemini-3.8-pro",
-                "gemini-2.5-flash",
-                "gemini-2.0-flash",
-                "gemini-1.5-flash",
-                "gemini-1.5-pro",
-                "gemini-pro"
-            ]
-            ordered = [m for m in priority_order if m in remote_models]
-            ordered += [m for m in remote_models if m not in ordered]
-            return ordered
-    except Exception as e:
-        logger.warning(f"Could not list models dynamically: {e}")
-
-    return CANDIDATE_MODELS
 
 
 class GeminiAuthError(Exception):
@@ -76,88 +48,145 @@ def get_active_api_key(override_key=None):
     return key.strip()
 
 
-def get_configured_genai_client(api_key=None):
-    """Configures the google.generativeai SDK with the active key."""
+def get_genai_client(api_key=None):
+    """Returns a configured modern google.genai Client."""
     key = get_active_api_key(api_key)
-    import google.generativeai as genai
-    genai.configure(api_key=key)
-    return genai
+    try:
+        from google import genai
+        return genai.Client(api_key=key)
+    except Exception as e:
+        logger.warning(f"Could not initialize modern google.genai client: {e}")
+        return None
 
 
 def test_api_connection(api_key=None):
     """Tests the API connection and returns the working model name."""
     global _ACTIVE_WORKING_MODEL
-    genai = get_configured_genai_client(api_key)
-    candidate_models = get_candidate_models(genai)
-
-    # Prioritize already working model if available
+    key = get_active_api_key(api_key)
+    
     models_to_test = []
-    if _ACTIVE_WORKING_MODEL and _ACTIVE_WORKING_MODEL in candidate_models:
+    if _ACTIVE_WORKING_MODEL and _ACTIVE_WORKING_MODEL in CANDIDATE_MODELS:
         models_to_test.append(_ACTIVE_WORKING_MODEL)
-    models_to_test += [m for m in candidate_models if m not in models_to_test]
+    for m in CANDIDATE_MODELS:
+        if m not in models_to_test:
+            models_to_test.append(m)
 
+    client = get_genai_client(key)
     errors = []
-    for model_name in models_to_test:
-        try:
-            model = genai.GenerativeModel(model_name)
-            response = model.generate_content("Ping. Reply with 'PONG'", request_options={"timeout": 15})
-            if response and response.text:
-                _ACTIVE_WORKING_MODEL = model_name
-                return {"status": "ok", "model": model_name, "message": "Connection successful"}
-        except Exception as e:
-            errors.append(f"{model_name}: {str(e)}")
-            continue
+    
+    if client:
+        from google.genai import types
+        for model_name in models_to_test:
+            try:
+                res = client.models.generate_content(
+                    model=model_name,
+                    contents="Say 'OK'",
+                    config=types.GenerateContentConfig(
+                        temperature=0.1,
+                        max_output_tokens=10
+                    )
+                )
+                if res and res.text:
+                    _ACTIVE_WORKING_MODEL = model_name
+                    logger.info(f"Verified working Gemini model: {model_name}")
+                    return {"status": "ok", "model": model_name, "message": "Connection successful"}
+            except Exception as e:
+                err_msg = str(e)
+                logger.warning(f"Model test failed for {model_name}: {err_msg}")
+                errors.append(f"{model_name}: {err_msg}")
+                continue
 
-    raise GeminiGenerationError(f"Could not connect using any model. Errors: {'; '.join(errors)}")
+    # Legacy SDK fallback if modern client is unavailable
+    try:
+        import google.generativeai as legacy_genai
+        legacy_genai.configure(api_key=key)
+        for model_name in models_to_test:
+            try:
+                mod = legacy_genai.GenerativeModel(model_name)
+                res = mod.generate_content("Say 'OK'", request_options={"timeout": 15})
+                if res and res.text:
+                    _ACTIVE_WORKING_MODEL = model_name
+                    return {"status": "ok", "model": model_name, "message": "Connection successful"}
+            except Exception as e:
+                errors.append(f"{model_name}: {str(e)}")
+                continue
+    except Exception as e:
+        errors.append(f"Legacy SDK: {str(e)}")
+
+    raise GeminiGenerationError(f"Could not connect to Gemini API using any supported model. Errors: {'; '.join(errors[:3])}")
 
 
-def _generate_with_fallback(prompt, api_key=None, temperature=0.7):
-    """Generates text content with automatic model fallback and timeout safeguards."""
+def _generate_with_fallback(prompt, api_key=None, temperature=0.5):
+    """Generates text content using modern google.genai SDK with automatic model fallback."""
     global _ACTIVE_WORKING_MODEL
-    genai = get_configured_genai_client(api_key)
-    candidate_models = get_candidate_models(genai)
+    key = get_active_api_key(api_key)
+    client = get_genai_client(key)
 
-    # Prioritize active working model first
     models_to_try = []
-    if _ACTIVE_WORKING_MODEL:
+    if _ACTIVE_WORKING_MODEL and _ACTIVE_WORKING_MODEL in CANDIDATE_MODELS:
         models_to_try.append(_ACTIVE_WORKING_MODEL)
-    for m in candidate_models:
+    for m in CANDIDATE_MODELS:
         if m not in models_to_try:
             models_to_try.append(m)
 
     last_error = None
-    # Limit number of models to try in fallback to avoid HTTP timeouts (maximum 4 models)
-    for model_name in models_to_try[:4]:
-        try:
-            generation_config = genai.types.GenerationConfig(
-                temperature=temperature,
-                max_output_tokens=4096
-            )
-            model = genai.GenerativeModel(
-                model_name=model_name,
-                generation_config=generation_config
-            )
-            response = model.generate_content(prompt, request_options={"timeout": 45})
-            
-            # Safe text extraction handling potential safety blocks
-            text = None
+
+    if client:
+        from google.genai import types
+        for model_name in models_to_try[:3]:
             try:
-                text = response.text
-            except Exception:
-                if getattr(response, "candidates", None) and response.candidates[0].content.parts:
-                    text = "".join(part.text for part in response.candidates[0].content.parts if hasattr(part, "text"))
+                config = types.GenerateContentConfig(
+                    temperature=temperature,
+                    max_output_tokens=4096
+                )
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=config
+                )
+                
+                text = getattr(response, "text", None)
+                if not text and getattr(response, "candidates", None):
+                    cand = response.candidates[0]
+                    if getattr(cand, "content", None) and getattr(cand.content, "parts", None):
+                        text = "".join(getattr(p, "text", "") for p in cand.content.parts if hasattr(p, "text"))
 
-            if text and text.strip():
-                _ACTIVE_WORKING_MODEL = model_name
-                logger.info(f"Successfully generated content using model: {model_name}")
-                return text.strip()
+                if text and text.strip():
+                    _ACTIVE_WORKING_MODEL = model_name
+                    logger.info(f"Successfully generated content using model: {model_name}")
+                    return text.strip()
 
-        except Exception as e:
-            last_error = e
-            logger.warning(f"Model {model_name} failed: {e}. Trying fallback...")
-            continue
+            except Exception as e:
+                last_error = e
+                logger.warning(f"Model {model_name} failed: {e}. Trying fallback...")
+                continue
 
-    raise GeminiGenerationError(f"Failed to generate content: {str(last_error)}")
+    # Legacy fallback if needed
+    try:
+        import google.generativeai as legacy_genai
+        legacy_genai.configure(api_key=key)
+        for model_name in models_to_try[:2]:
+            try:
+                gen_config = legacy_genai.types.GenerationConfig(
+                    temperature=temperature,
+                    max_output_tokens=4096
+                )
+                model = legacy_genai.GenerativeModel(
+                    model_name=model_name,
+                    generation_config=gen_config
+                )
+                response = model.generate_content(prompt, request_options={"timeout": 45})
+                text = response.text if hasattr(response, "text") else None
+                if text and text.strip():
+                    _ACTIVE_WORKING_MODEL = model_name
+                    return text.strip()
+            except Exception as e:
+                last_error = e
+                continue
+    except Exception:
+        pass
+
+    raise GeminiGenerationError(f"Failed to generate content across available models. Last error: {str(last_error)}")
 
 
 def clean_json_response(raw_text):

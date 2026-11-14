@@ -165,29 +165,6 @@ def about_page():
 # API ENDPOINTS
 # ==========================================
 
-@app.route("/api/probe", methods=["GET"])
-def api_probe():
-    model_name = request.args.get("model", "gemini-3.5-flash-lite")
-    api_key = get_effective_api_key()
-    if not api_key:
-        return jsonify({"success": False, "error": "No API key configured"}), 400
-    try:
-        from google import genai
-        client = genai.Client(api_key=api_key)
-        res = client.models.generate_content(model=model_name, contents="Reply with 'PROBE_OK'")
-        return jsonify({
-            "success": True,
-            "model": model_name,
-            "text": res.text.strip() if res.text else "No text"
-        })
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "model": model_name,
-            "error": str(e)
-        }), 200
-
-
 @app.route("/api/status", methods=["GET"])
 def api_status():
     """Returns API readiness status and configured models."""

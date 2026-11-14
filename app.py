@@ -171,26 +171,37 @@ def api_debug_models():
     if not api_key:
         return jsonify({"error": "No API key configured"}), 400
     report = {}
-    # 1. Test google.generativeai
-    try:
-        import google.generativeai as legacy_genai
-        legacy_genai.configure(api_key=api_key)
-        gen_models = [
-            m.name for m in legacy_genai.list_models() 
-            if "generateContent" in getattr(m, "supported_generation_methods", [])
-        ]
-        report["legacy_sdk_models"] = gen_models
-    except Exception as e:
-        report["legacy_sdk_error"] = str(e)
-
-    # 2. Test google.genai
+    
+    # Test generation with modern google.genai SDK
     try:
         from google import genai as modern_genai
         client = modern_genai.Client(api_key=api_key)
-        modern_models = [m.name for m in client.models.list()]
-        report["modern_sdk_models"] = modern_models
+        test_modern = {}
+        for m in ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.8-flash", "gemma-4-26b-a4b-it"]:
+            try:
+                res = client.models.generate_content(model=m, contents="Say 'ok'")
+                test_modern[m] = {"ok": True, "text": res.text[:50] if res.text else "No text"}
+            except Exception as e:
+                test_modern[m] = {"ok": False, "error": str(e)}
+        report["modern_sdk_test"] = test_modern
     except Exception as e:
         report["modern_sdk_error"] = str(e)
+
+    # Test generation with legacy google.generativeai SDK
+    try:
+        import google.generativeai as legacy_genai
+        legacy_genai.configure(api_key=api_key)
+        test_legacy = {}
+        for m in ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.8-flash", "gemma-4-26b-a4b-it"]:
+            try:
+                mod = legacy_genai.GenerativeModel(m)
+                res = mod.generate_content("Say 'ok'", request_options={"timeout": 15})
+                test_legacy[m] = {"ok": True, "text": res.text[:50] if res.text else "No text"}
+            except Exception as e:
+                test_legacy[m] = {"ok": False, "error": str(e)}
+        report["legacy_sdk_test"] = test_legacy
+    except Exception as e:
+        report["legacy_sdk_error"] = str(e)
 
     return jsonify(report)
 

@@ -1103,6 +1103,15 @@ select.form-control {
   .flashcards-scene {
     height: 420px;
   }
+  .rendered-content table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+  .rendered-content .mermaid {
+    padding: 0.75rem;
+  }
 }
 
 /* ===================================================================

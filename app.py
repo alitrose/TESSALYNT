@@ -216,7 +216,7 @@ def set_session_key():
 
 @app.route("/api/generate-notes", methods=["POST"])
 def api_generate_notes():
-    """Generates structured academic study notes."""
+    """Generates structured academic study notes with three selectable learning levels."""
     data = request.get_json() or {}
     stream = data.get("stream", "").strip()
     department = data.get("department", "").strip()
@@ -225,6 +225,10 @@ def api_generate_notes():
     subject = data.get("subject", "").strip()
     topic = data.get("topic", "").strip()
     instructions = data.get("instructions", "").strip()
+    learning_level = data.get("learning_level", "academic").strip().lower()
+
+    if learning_level not in ["beginner", "academic", "exam"]:
+        learning_level = "academic"
 
     if not subject or not topic:
         return jsonify({"error": "VALIDATION_ERROR", "message": "Subject and Topic are required fields."}), 400
@@ -246,11 +250,18 @@ def api_generate_notes():
             semester=semester,
             subject=subject,
             topic=topic,
+            learning_level=learning_level,
             additional_instructions=instructions,
             api_key=api_key
         )
 
-        title = f"{topic} - Academic Notes"
+        level_labels = {
+            "beginner": "Beginner Friendly Notes",
+            "academic": "University Academic Notes",
+            "exam": "Exam Preparation Notes"
+        }
+        title = f"{topic} - {level_labels.get(learning_level, 'Academic Notes')}"
+
         # Auto-save to study materials library
         material_id = save_material(
             session_id=sess_id,
@@ -262,7 +273,8 @@ def api_generate_notes():
             stream=stream,
             department=department,
             academic_year=year,
-            semester=semester
+            semester=semester,
+            difficulty=learning_level
         )
 
         return jsonify({
@@ -272,6 +284,7 @@ def api_generate_notes():
             "subject": subject,
             "topic": topic,
             "stream": stream,
+            "learning_level": learning_level,
             "content": notes_content
         })
 
@@ -550,8 +563,9 @@ def api_export_pdf():
     try:
         if export_type == "notes":
             content_text = data.get("content", "")
-            pdf_bytes = generate_notes_pdf(title, subject, topic, stream, content_text)
-            filename = f"Tessalynt_Notes_{slugify(topic)}.pdf"
+            learning_level = data.get("learning_level") or difficulty or "academic"
+            pdf_bytes = generate_notes_pdf(title, subject, topic, stream, content_text, learning_level=learning_level)
+            filename = f"Tessalynt_Notes_{slugify(topic)}_{slugify(learning_level)}.pdf"
 
         elif export_type == "revision":
             content_text = data.get("content", "")

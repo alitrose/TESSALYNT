@@ -72,6 +72,76 @@
         </div>
       </div>
 
+      <!-- Selectable Learning Levels -->
+      <div class="form-group" style="margin: 1.25rem 0 1.5rem;">
+        <label class="form-label" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <span style="font-size: 0.95rem; font-weight: 600; color: #FFFFFF;">Select Learning Level <span class="required">*</span></span>
+          <span style="font-size: 0.8rem; color: var(--text-dim);">Tailors conceptual depth, math explanations, diagrams & exam structure</span>
+        </label>
+
+        <div class="level-selector-grid">
+          <!-- Level 1: Beginner Friendly -->
+          <label class="level-card" for="levelBeginner">
+            <input type="radio" name="learningLevel" id="levelBeginner" value="beginner" class="level-radio">
+            <div class="level-card-inner">
+              <div class="level-card-top">
+                <span class="level-icon-wrap" style="background: rgba(16, 185, 129, 0.15); color: #34D399;">🌱</span>
+                <span class="level-badge badge-beginner">Level 1</span>
+              </div>
+              <h3 class="level-title">Beginner Friendly</h3>
+              <p class="level-desc">
+                Simple natural English, relatable analogies, intuitive intuition first, step-by-step breakdowns, and plain-English translations of every mathematical symbol.
+              </p>
+              <div class="level-tag-list">
+                <span class="level-tag">Intuitive</span>
+                <span class="level-tag">Plain English</span>
+                <span class="level-tag">Zero Anxiety</span>
+              </div>
+            </div>
+          </label>
+
+          <!-- Level 2: University Academic (Recommended Default) -->
+          <label class="level-card selected" for="levelAcademic">
+            <input type="radio" name="learningLevel" id="levelAcademic" value="academic" class="level-radio" checked>
+            <div class="level-card-inner">
+              <div class="level-card-top">
+                <span class="level-icon-wrap" style="background: rgba(99, 102, 241, 0.2); color: #818CF8;">🎓</span>
+                <span class="level-badge badge-recommended">Recommended • Level 2</span>
+              </div>
+              <h3 class="level-title">University Academic</h3>
+              <p class="level-desc">
+                Exhaustive syllabus depth, full formal academic definitions, complete mathematical symbol tables, theorems, proofs, algorithms, and architectural diagrams.
+              </p>
+              <div class="level-tag-list">
+                <span class="level-tag">Textbook Rigor</span>
+                <span class="level-tag">Symbol Tables</span>
+                <span class="level-tag">Full Depth</span>
+              </div>
+            </div>
+          </label>
+
+          <!-- Level 3: Exam Preparation -->
+          <label class="level-card" for="levelExam">
+            <input type="radio" name="learningLevel" id="levelExam" value="exam" class="level-radio">
+            <div class="level-card-inner">
+              <div class="level-card-top">
+                <span class="level-icon-wrap" style="background: rgba(245, 158, 11, 0.15); color: #FBBF24;">📝</span>
+                <span class="level-badge badge-exam">Level 3</span>
+              </div>
+              <h3 class="level-title">Exam Preparation</h3>
+              <p class="level-desc">
+                Structured university exam format: high-yield 2-mark definitions, 5-mark notes, 8-mark tables, and 13/16-mark long-answer model blueprints with common pitfalls.
+              </p>
+              <div class="level-tag-list">
+                <span class="level-tag">Scoring Rubrics</span>
+                <span class="level-tag">Model Answers</span>
+                <span class="level-tag">16-Mark Blueprints</span>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
       <div class="form-group">
         <label class="form-label" for="instructions">Additional Instructions (Optional)</label>
         <textarea id="instructions" class="form-control" rows="2" placeholder="e.g. Emphasize university exam questions, include page replacement algorithm comparisons, and give clear analogies."></textarea>
@@ -89,9 +159,9 @@
   <!-- Loading Box -->
   <div class="loading-box" id="notesLoading">
     <div class="spinner"></div>
-    <h3 style="font-size: 1.25rem; color: #FFFFFF; margin-bottom: 0.5rem;">Synthesizing Academic Notes...</h3>
-    <p style="font-size: 0.875rem; color: var(--text-muted); max-width: 440px; margin: 0 auto;">
-      Google Gemini is structuring your notes through 13 standardized academic dimensions, definitions, principles, and university FAQs.
+    <h3 style="font-size: 1.25rem; color: #FFFFFF; margin-bottom: 0.5rem;" id="loadingTitle">Synthesizing University Study Notes...</h3>
+    <p style="font-size: 0.875rem; color: var(--text-muted); max-width: 520px; margin: 0 auto; line-height: 1.6;" id="loadingDesc">
+      Google Gemini is authoring your notes using the Teaching-First methodology, mathematical symbol breakdowns, Mermaid diagrams, and university exam blueprints.
     </p>
   </div>
 
@@ -99,8 +169,11 @@
   <div class="output-card card" id="notesOutput">
     <div class="output-toolbar">
       <div class="output-title-wrap">
-        <h3 id="notesDocTitle">Generated Notes</h3>
-        <p style="font-size: 0.8rem; color: var(--text-muted);" id="notesDocMeta">Subject • Topic</p>
+        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.25rem; flex-wrap: wrap;">
+          <h3 id="notesDocTitle" style="margin: 0;">Generated Notes</h3>
+          <span id="notesLevelBadge" class="badge badge-primary">Level 2: Academic</span>
+        </div>
+        <p style="font-size: 0.825rem; color: var(--text-muted);" id="notesDocMeta">Subject • Topic</p>
       </div>
 
       <div class="output-actions">

@@ -213,6 +213,41 @@ def get_tessalynt_styles():
             fontSize=8.5,
             leading=12,
             textColor=C_TEXT
+        ),
+        "TableHeader": ParagraphStyle(
+            "TessalyntTableHeader",
+            parent=base_styles["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=8,
+            leading=10.5,
+            textColor=C_WHITE
+        ),
+        "TableCell": ParagraphStyle(
+            "TessalyntTableCell",
+            parent=base_styles["Normal"],
+            fontName="Helvetica",
+            fontSize=7.5,
+            leading=10,
+            textColor=C_TEXT
+        ),
+        "CodeText": ParagraphStyle(
+            "TessalyntCodeText",
+            parent=base_styles["Normal"],
+            fontName="Courier",
+            fontSize=7.5,
+            leading=10,
+            textColor=colors.HexColor("#312E81")
+        ),
+        "MathDisplay": ParagraphStyle(
+            "TessalyntMathDisplay",
+            parent=base_styles["Normal"],
+            fontName="Helvetica-BoldOblique",
+            fontSize=9,
+            leading=13,
+            textColor=C_PRIMARY_DARK,
+            alignment=1, # Centered
+            spaceBefore=4,
+            spaceAfter=4
         )
     }
     return styles
@@ -222,8 +257,58 @@ def _clean_markdown_to_xml(text):
     """Escapes XML entities and transforms Markdown inline syntax into ReportLab tags."""
     if not text:
         return ""
+    
+    # 1. First convert LaTeX math delimiters to clean readable forms before XML escaping
+    # Display math $$ ... $$
+    text = re.sub(r"\$\$([\s\S]*?)\$\$", r"[Math: \1]", text)
+    # Inline math $ ... $
+    text = re.sub(r"\$([^\$\n]+?)\$", r"|\1|", text)
+    
+    # Common LaTeX symbol conversions for readable PDF
+    replacements = {
+        "\\delta": "δ",
+        "\\Sigma": "Σ",
+        "\\Gamma": "Γ",
+        "\\to": "→",
+        "\\rightarrow": "→",
+        "\\leftarrow": "←",
+        "\\times": "×",
+        "\\in": "∈",
+        "\\notin": "∉",
+        "\\cup": "∪",
+        "\\cap": "∩",
+        "\\subseteq": "⊆",
+        "\\le": "≤",
+        "\\ge": "≥",
+        "\\neq": "≠",
+        "\\approx": "≈",
+        "\\infty": "∞",
+        "\\forall": "∀",
+        "\\exists": "∃",
+        "\\vdash": "⊢",
+        "\\models": "⊨",
+        "\\circ": "∘",
+        "\\cdot": "·",
+        "\\sqcup": "␣",
+        "\\Box": "□",
+        "\\theta": "θ",
+        "\\Theta": "Θ",
+        "\\Omega": "Ω",
+        "\\omega": "ω",
+        "\\alpha": "α",
+        "\\beta": "β",
+        "\\lambda": "λ",
+        "\\pi": "π"
+    }
+    for sym, char in replacements.items():
+        text = text.replace(sym, char)
+
     # XML entity replacements
     text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+    # Re-wrap inline math placeholder |...| in clean italics
+    text = re.sub(r"\|([^\|\n]+?)\|", r"<i><b>\1</b></i>", text)
+
     # Bold **text** or __text__
     text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
     text = re.sub(r"__(.+?)__", r"<b>\1</b>", text)
@@ -235,21 +320,70 @@ def _clean_markdown_to_xml(text):
     return text
 
 
-def build_meta_header(title, subject, topic, stream_or_type, extra_meta=None):
+def _parse_markdown_table(table_lines, styles):
+    """Converts markdown table lines into a clean ReportLab Table flowable."""
+    raw_rows = []
+    for line in table_lines:
+        line_str = line.strip()
+        # Skip markdown separator row like |:---|:---|
+        if re.match(r"^\|[\s\-:]+(\|[\s\-:]+)+\|$", line_str):
+            continue
+        cells = [c.strip() for c in line_str.strip("|").split("|")]
+        if cells:
+            raw_rows.append(cells)
+
+    if not raw_rows:
+        return None
+
+    max_cols = max(len(r) for r in raw_rows)
+    normalized_rows = []
+    for idx, row in enumerate(raw_rows):
+        padded = row + [""] * (max_cols - len(row))
+        row_paras = []
+        for cell in padded:
+            clean_cell = _clean_markdown_to_xml(cell)
+            if idx == 0:
+                p = Paragraph(f"<b>{clean_cell}</b>", styles["TableHeader"])
+            else:
+                p = Paragraph(clean_cell, styles["TableCell"])
+            row_paras.append(p)
+        normalized_rows.append(row_paras)
+
+    total_width = A4[0] - 72 # 523 pt
+    col_w = total_width / float(max_cols)
+
+    t = Table(normalized_rows, colWidths=[col_w] * max_cols)
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), C_PRIMARY_DARK),
+        ('TEXTCOLOR', (0, 0), (-1, 0), C_WHITE),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 5),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        ('GRID', (0, 0), (-1, -1), 0.5, C_BORDER),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [C_WHITE, C_CARD_BG]),
+    ]))
+    return t
+
+
+def build_meta_header(title, subject, topic, stream_or_type, learning_level=None):
     """Creates a branded metadata banner table for the document top."""
     styles = get_tessalynt_styles()
     col_width = (A4[0] - 72) / 3.0 # 3 equal columns
+
+    level_display = (learning_level or "University Academic").replace("_", " ").title()
+    track_display = f"{stream_or_type or 'Higher Education'} • {level_display}" if learning_level else (stream_or_type or "Higher Education")
 
     data = [
         [
             Paragraph("SUBJECT", styles["MetaLabel"]),
             Paragraph("TOPIC", styles["MetaLabel"]),
-            Paragraph("TRACK / SPEC", styles["MetaLabel"])
+            Paragraph("TRACK / LEARNING LEVEL", styles["MetaLabel"])
         ],
         [
             Paragraph(_clean_markdown_to_xml(subject or "General"), styles["MetaValue"]),
             Paragraph(_clean_markdown_to_xml(topic or "Study Material"), styles["MetaValue"]),
-            Paragraph(_clean_markdown_to_xml(stream_or_type or "Higher Education"), styles["MetaValue"])
+            Paragraph(_clean_markdown_to_xml(track_display), styles["MetaValue"])
         ]
     ]
 
@@ -267,17 +401,79 @@ def build_meta_header(title, subject, topic, stream_or_type, extra_meta=None):
 
 
 def markdown_to_flowables(md_text, styles):
-    """Converts a full markdown document into a list of ReportLab Flowable objects."""
+    """Converts a full markdown document into a list of ReportLab Flowable objects with table and code support."""
     flowables = []
     lines = md_text.split("\n")
     i = 0
-    while i < len(lines):
+    total_lines = len(lines)
+
+    while i < total_lines:
         line = lines[i].strip()
         if not line:
             i += 1
             continue
 
-        # Headings
+        # 1. Markdown Table Detection (| ... |)
+        if line.startswith("|") and line.endswith("|") and i + 1 < total_lines:
+            table_lines = [line]
+            i += 1
+            while i < total_lines and lines[i].strip().startswith("|") and lines[i].strip().endswith("|"):
+                table_lines.append(lines[i].strip())
+                i += 1
+            table_flowable = _parse_markdown_table(table_lines, styles)
+            if table_flowable:
+                flowables.append(Spacer(1, 4))
+                flowables.append(table_flowable)
+                flowables.append(Spacer(1, 6))
+            continue
+
+        # 2. Fenced Code / Mermaid Block Detection (``` ... ```)
+        if line.startswith("```"):
+            code_type = line[3:].strip().lower()
+            code_lines = []
+            i += 1
+            while i < total_lines and not lines[i].strip().startswith("```"):
+                code_lines.append(lines[i])
+                i += 1
+            i += 1 # skip closing ```
+
+            if code_type == "mermaid":
+                # Render clean diagram indicator with structured flowchart text
+                flowables.append(Spacer(1, 4))
+                diag_box = [
+                    [Paragraph("<b>VISUAL WORKFLOW / DIAGRAM ARCHITECTURE</b>", styles["MetaLabel"])],
+                    [Paragraph("<font face='Courier' color='#312E81'>" + "<br/>".join(_clean_markdown_to_xml(l) for l in code_lines if l.strip()) + "</font>", styles["TableCell"])]
+                ]
+                t_diag = Table(diag_box, colWidths=[A4[0] - 72])
+                t_diag.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#EEF2FF")),
+                    ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor("#F5F3FF")),
+                    ('BOX', (0, 0), (-1, -1), 0.75, C_PRIMARY),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+                    ('TOPPADDING', (0, 0), (-1, -1), 5),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+                ]))
+                flowables.append(t_diag)
+                flowables.append(Spacer(1, 6))
+            else:
+                # Regular code block
+                flowables.append(Spacer(1, 3))
+                code_content = "<br/>".join(_clean_markdown_to_xml(l) for l in code_lines)
+                t_code = Table([[Paragraph(code_content, styles["CodeText"])]], colWidths=[A4[0] - 72])
+                t_code.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#F1F5F9")),
+                    ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E1")),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+                    ('TOPPADDING', (0, 0), (-1, -1), 6),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                ]))
+                flowables.append(t_code)
+                flowables.append(Spacer(1, 5))
+            continue
+
+        # 3. Headings
         if line.startswith("# "):
             heading_text = _clean_markdown_to_xml(line[2:].strip())
             flowables.append(Paragraph(heading_text, styles["Title"]))
@@ -329,8 +525,8 @@ def markdown_to_flowables(md_text, styles):
 # ==========================================
 # 1. ACADEMIC NOTES PDF GENERATOR
 # ==========================================
-def generate_notes_pdf(title, subject, topic, stream, notes_markdown):
-    """Builds a complete, multi-page, publication-grade academic notes PDF."""
+def generate_notes_pdf(title, subject, topic, stream, notes_markdown, learning_level="academic"):
+    """Builds a complete, multi-page, publication-grade academic notes PDF with level metadata."""
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
         buffer,
@@ -349,8 +545,8 @@ def generate_notes_pdf(title, subject, topic, stream, notes_markdown):
     story.append(Paragraph(_clean_markdown_to_xml(title or topic), styles["Title"]))
     story.append(Spacer(1, 6))
 
-    # Meta banner
-    story.append(build_meta_header(title, subject, topic, stream or "Academic Standard"))
+    # Meta banner with learning level
+    story.append(build_meta_header(title, subject, topic, stream or "Academic Standard", learning_level=learning_level))
     story.append(Spacer(1, 12))
 
     # Convert notes markdown
@@ -358,6 +554,8 @@ def generate_notes_pdf(title, subject, topic, stream, notes_markdown):
     story.extend(body_flowables)
 
     doc.build(story, canvasmaker=NumberedCanvas)
+    buffer.seek(0)
+    return buffer.getvalue()
     buffer.seek(0)
     return buffer.getvalue()
 

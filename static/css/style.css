@@ -1104,3 +1104,262 @@ select.form-control {
     height: 420px;
   }
 }
+
+/* ===================================================================
+   LEARNING LEVEL SELECTOR & RICH ACADEMIC NOTES RENDERING
+   =================================================================== */
+.level-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 840px) {
+  .level-selector-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.level-card {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  user-select: none;
+}
+
+.level-radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.level-card-inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: rgba(17, 24, 39, 0.7);
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.15rem;
+  transition: all var(--transition-normal);
+  backdrop-filter: blur(8px);
+}
+
+.level-card:hover .level-card-inner {
+  background: rgba(30, 41, 59, 0.75);
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4);
+}
+
+.level-card.selected .level-card-inner,
+.level-radio:checked ~ .level-card-inner {
+  background: linear-gradient(145deg, rgba(30, 27, 75, 0.85) 0%, rgba(17, 24, 39, 0.95) 100%);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.35), 0 12px 28px -8px rgba(79, 70, 229, 0.35);
+  transform: translateY(-2px);
+}
+
+.level-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.level-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.level-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+}
+
+.badge-beginner {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.badge-recommended {
+  background: rgba(99, 102, 241, 0.2);
+  color: #A5B4FC;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+}
+
+.badge-exam {
+  background: rgba(245, 158, 11, 0.18);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.level-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 0.45rem;
+}
+
+.level-desc {
+  font-size: 0.825rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  flex-grow: 1;
+}
+
+.level-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: auto;
+}
+
+.level-tag {
+  font-size: 0.7rem;
+  color: #94A3B8;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+}
+
+/* Rich Content Enhancements */
+.rendered-content {
+  font-size: 0.965rem;
+  line-height: 1.7;
+  color: #CBD5E1;
+}
+
+.rendered-content h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  border-bottom: 2px solid rgba(99, 102, 241, 0.3);
+  padding-bottom: 0.75rem;
+  margin: 1.5rem 0 1rem;
+}
+
+.rendered-content h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #A5B4FC;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.5rem;
+  margin: 2rem 0 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rendered-content h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #C084FC;
+  margin: 1.5rem 0 0.6rem;
+}
+
+.rendered-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #E2E8F0;
+  margin: 1.25rem 0 0.5rem;
+}
+
+/* Tables */
+.rendered-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0 1.75rem;
+  font-size: 0.875rem;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  display: table;
+}
+
+.rendered-content th {
+  background: rgba(30, 27, 75, 0.9);
+  color: #FFFFFF;
+  font-weight: 700;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-subtle);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.rendered-content td {
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--border-subtle);
+  color: #E2E8F0;
+  vertical-align: top;
+}
+
+.rendered-content tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.rendered-content tr:hover td {
+  background: rgba(99, 102, 241, 0.06);
+}
+
+/* Code & Pre Blocks */
+.rendered-content pre {
+  background: #070A12;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-md);
+  padding: 1.15rem 1.25rem;
+  margin: 1.25rem 0;
+  overflow-x: auto;
+  position: relative;
+}
+
+.rendered-content pre code {
+  background: transparent;
+  padding: 0;
+  color: #E0E7FF;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Mermaid Diagrams */
+.rendered-content .mermaid {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.rendered-content .diagram-fallback {
+  background: rgba(15, 23, 42, 0.75);
+  border-left: 3px solid var(--primary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+
+/* Math Delimiters */
+.katex-display {
+  margin: 1.25rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+}

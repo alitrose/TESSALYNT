@@ -234,7 +234,66 @@ async function downloadTxtFromApi(title, subject, topic, content) {
   }
 }
 
-// Simple Markdown Renderer for client-side display
+// Academic Markdown & Math Renderer with KaTeX & Mermaid Support
+function renderAcademicMarkdown(md, targetElement) {
+  if (!md || !targetElement) return;
+
+  let html = "";
+  if (window.marked && typeof marked.parse === "function") {
+    marked.setOptions({
+      gfm: true,
+      breaks: true,
+      tables: true
+    });
+    html = marked.parse(md);
+  } else {
+    html = renderSimpleMarkdown(md);
+  }
+
+  targetElement.innerHTML = html;
+
+  // 1. Render KaTeX Mathematical Expressions
+  if (window.renderMathInElement) {
+    try {
+      renderMathInElement(targetElement, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "$", right: "$", display: false },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    } catch (e) {
+      console.warn("KaTeX rendering notice:", e);
+    }
+  }
+
+  // 2. Render Mermaid Visual Diagrams
+  if (window.mermaid) {
+    try {
+      const mermaidNodes = targetElement.querySelectorAll("pre code.language-mermaid, pre code.lang-mermaid");
+      if (mermaidNodes.length > 0) {
+        mermaidNodes.forEach((codeNode, idx) => {
+          const pre = codeNode.parentElement;
+          const diagramCode = codeNode.textContent;
+          const diagramDiv = document.createElement("div");
+          diagramDiv.className = "mermaid";
+          diagramDiv.id = `mermaid-diag-${Date.now()}-${idx}`;
+          diagramDiv.textContent = diagramCode;
+          pre.parentNode.replaceChild(diagramDiv, pre);
+        });
+        mermaid.run({
+          nodes: targetElement.querySelectorAll(".mermaid")
+        });
+      }
+    } catch (e) {
+      console.warn("Mermaid rendering notice:", e);
+    }
+  }
+}
+
+// Fallback Markdown Renderer for client-side display
 function renderSimpleMarkdown(md) {
   if (!md) return "";
   let html = md

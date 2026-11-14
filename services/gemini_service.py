@@ -116,7 +116,7 @@ def test_api_connection(api_key=None):
     raise GeminiGenerationError(f"Could not connect to Gemini API using any supported model. Errors: {'; '.join(errors[:3])}")
 
 
-def _generate_with_fallback(prompt, api_key=None, temperature=0.5, response_mime_type=None):
+def _generate_with_fallback(prompt, api_key=None, temperature=0.5, response_mime_type=None, max_output_tokens=4096):
     """Generates text content using modern google.genai SDK with automatic model fallback."""
     global _ACTIVE_WORKING_MODEL
     key = get_active_api_key(api_key)
@@ -137,7 +137,7 @@ def _generate_with_fallback(prompt, api_key=None, temperature=0.5, response_mime
             try:
                 config_kwargs = {
                     "temperature": temperature,
-                    "max_output_tokens": 4096
+                    "max_output_tokens": max_output_tokens
                 }
                 if response_mime_type:
                     config_kwargs["response_mime_type"] = response_mime_type
@@ -173,7 +173,7 @@ def _generate_with_fallback(prompt, api_key=None, temperature=0.5, response_mime
             try:
                 legacy_kwargs = {
                     "temperature": temperature,
-                    "max_output_tokens": 4096
+                    "max_output_tokens": max_output_tokens
                 }
                 if response_mime_type:
                     legacy_kwargs["response_mime_type"] = response_mime_type
@@ -252,70 +252,202 @@ def clean_json_response(raw_text):
 # FEATURE 1: ACADEMIC NOTES GENERATOR
 # ==========================================
 def generate_academic_notes(stream, department, year, semester, subject, topic, 
-                            additional_instructions="", api_key=None):
+                            learning_level="academic", additional_instructions="", api_key=None):
     """
     Generates comprehensive, university-grade academic study notes
-    following the 13 required academic sections.
+    using a teaching-first methodology across three distinct learning levels:
+    - 'beginner': Level 1 – Beginner Friendly (Intuition, analogies, plain-English math, gradual examples)
+    - 'academic': Level 2 – University Academic (Rigorous formal depth, complete symbol breakdowns, proofs, architecture)
+    - 'exam':     Level 3 – Exam Preparation (Mark-based question schemes 2M, 5M, 8M, 13/16M model answers, rubrics)
     """
-    prompt = f"""
-You are an expert university professor and master educator for {stream} students in the Department of {department}.
-Your task is to write comprehensive, rigorous, yet accessible study notes for the subject '{subject}' on the topic '{topic}'.
-Target Audience: {academic_level_descriptor(year, semester, stream)}.
+    level_key = (learning_level or "academic").strip().lower()
+    if level_key not in ["beginner", "academic", "exam"]:
+        level_key = "academic"
 
-IMPORTANT ARCHITECTURAL REQUIREMENTS:
-You MUST structure the study notes using the following 13 numbered sections. Adapt and contextualize each section naturally to the topic:
+    level_meta = {
+        "beginner": {
+            "name": "Level 1: Beginner Friendly",
+            "persona": "an expert pedagogical tutor, student mentor, and master visual educator",
+            "tone": "warm, lucid, highly accessible, conversational yet intellectually sound",
+            "temp": 0.35
+        },
+        "academic": {
+            "name": "Level 2: University Academic (In-Depth)",
+            "persona": "a distinguished university professor and accredited curriculum author",
+            "tone": "academically rigorous, formally precise, exhaustive, and conceptually authoritative",
+            "temp": 0.3
+        },
+        "exam": {
+            "name": "Level 3: University Exam Preparation (Scoring Focused)",
+            "persona": "a senior university chief examiner, evaluator, and exam strategy specialist",
+            "tone": "laser-focused on university examination scoring rubrics, mark distributions, and structured model answers",
+            "temp": 0.25
+        }
+    }[level_key]
+
+    target_aud = academic_level_descriptor(year, semester, stream)
+
+    if level_key == "beginner":
+        level_guide = """### LEVEL 1: BEGINNER FRIENDLY FOCUS:
+- Explain every technical term in plain English before or immediately upon introducing it.
+- Use intuitive real-world analogies (e.g. libraries, postal systems, assembly lines, everyday objects).
+- Demystify mathematical expressions: explain what each formula means in plain English sentences before showing the equation.
+- Provide simple, gradual worked examples with every step clearly explained.
+- Emphasize WHY this concept was invented and what problem it solves.
+- Tone should make the student feel capable and eliminate academic anxiety."""
+    elif level_key == "exam":
+        level_guide = """### LEVEL 3: EXAM PREPARATION FOCUS:
+- Structure content around university examination patterns and mark allocations.
+- Highlight high-frequency 2-mark definitions, 5-mark short notes, and 8-mark comparative questions.
+- Include a full 13-Mark / 16-Mark University Long-Answer Blueprint with Model Answer:
+  * Introduction (1 mark)
+  * Formal Definition & Notation (2 marks)
+  * System Architecture / Block Diagram (3 marks)
+  * Step-by-Step Working & Mathematical Derivation (5 marks)
+  * Solved Numerical Problem or Scenario (3 marks)
+  * Advantages, Limitations & Conclusion (2 marks)
+- Include 'Common Student Mistakes & Mark Deductions' (where students lose marks and how to prevent it).
+- Include high-yield comparison tables and a 5-minute pre-exam revision checklist."""
+    else:
+        level_guide = """### LEVEL 2: UNIVERSITY ACADEMIC FOCUS:
+- Deliver exhaustive university-grade depth and theoretical completeness.
+- Present full formal definitions, formal mathematical tuples, domain/codomain mappings, and invariant properties.
+- Include symbol-by-symbol breakdown tables for all mathematical formulations.
+- Include algorithms, state transition mechanisms, formal theorems, and rigorous proofs/derivations.
+- Provide step-by-step advanced worked examples and comparison matrices.
+- Align with top university curricula (e.g. MIT, Stanford, IIT, NPTEL syllabus standards)."""
+
+    prompt = f"""
+You are {level_meta["persona"]} delivering academic study notes for {stream} students in the Department of {department}.
+Subject: {subject}
+Topic: {topic}
+Target Audience / Academic Level: {target_aud}
+Selected Learning Level: {level_meta["name"]}
+Tone & Stance: {level_meta["tone"]}
+
+================================================================================
+CORE PEDAGOGICAL DIRECTIVE: TEACHING-FIRST EXPLANATION METHOD
+================================================================================
+CRITICAL RULE: DO NOT overwhelm students with dry theoretical jargon or formal definitions before they understand the underlying idea!
+For every major concept, adhere to the Teaching-First sequence:
+1. SIMPLE MEANING: Explain what the concept means in simple, clear language.
+2. INTUITION: Explain the core logic and 'why' behind it.
+3. RELATABLE ANALOGY: Provide an intuitive, real-world analogy.
+4. FORMAL DEFINITION: State the formal textbook definition. Highlight technical keywords in **bold**.
+5. TECHNICAL BREAKDOWN & SYMBOL DICTIONARY: Explain every variable, symbol, and term.
+6. STEP-BY-STEP WORKING: Explain the operational mechanics chronologically.
+7. WORKED EXAMPLES: Walk through concrete examples starting simple and increasing in depth.
+8. EXAMINATION SCORING TIP: Note key points students must include in exam answers.
+
+================================================================================
+LEARNING LEVEL SPECIALIZATION ({level_meta["name"].upper()})
+================================================================================
+{level_guide}
+
+================================================================================
+FLEXIBLE 23-SECTION EDUCATIONAL SYLLABUS STRUCTURE
+================================================================================
+Structure the notes using the following standard sections (intelligently adapt to the subject matter; e.g. Theory of Computation needs formal tuples and transition diagrams; Mathematics needs derivations; CS needs code; DBMS needs SQL/schemas):
 
 # {topic}: Complete Academic Study Notes
-**Subject:** {subject} | **Stream/Degree:** {stream} ({department}) | **Academic Level:** {year}, {semester}
+**Subject:** {subject} | **Stream/Degree:** {stream} ({department}) | **Academic Level:** {target_aud} | **Mode:** {level_meta["name"]}
 
-## 1. Introduction
-Provide a clear, engaging overview of {topic}. Explain what it is, why it matters in modern academia/industry, and how it connects to the broader curriculum of {subject}.
+## 1. Topic Overview & Context
+Brief executive overview of {topic} within {subject}, explaining its academic significance and industry relevance.
 
-## 2. Formal Definition
-Provide accurate, formal definitions as established in textbook standards and accredited syllabi. Highlight key technical terminology in **bold**.
+## 2. Introduction & Background
+Historical context, motivation, and why traditional methods were insufficient before this concept was developed.
 
-## 3. Detailed Explanation
-Deliver a comprehensive, in-depth conceptual breakdown. Explain fundamental theories, underlying mechanics, and architectural or mathematical intuition. Use step-by-step paragraphs and formatting.
+## 3. Learning Objectives
+Specific, measurable competencies the student will gain after studying these notes.
 
-## 4. Important Concepts & Terminology
-Define the core building blocks, keywords, axioms, or components necessary for mastering this topic. Present with clear bullet points.
+## 4. Prerequisites
+Foundational concepts required before studying this topic, with quick 1-sentence refresher summaries.
 
-## 5. Types and Classifications
-Present any taxonomies, categories, models, or variants of {topic}. Explain the criteria used for categorization and distinguish between types clearly.
+## 5. Basic Concept Explained Simply (Intuition & Analogy)
+Explain the core concept in plain English. Include a relatable real-world analogy that makes the mechanism immediately clear.
 
-## 6. Working Principles & Mechanism
-Explain step-by-step how {topic} operates or functions in practice. If relevant, include logical workflows, execution steps, or equations.
+## 6. Important Terminology & Keywords
+De-jargonized vocabulary list defining key technical terms in simple language.
 
-## 7. Real-World Examples & Case Studies
-Provide at least 2 to 3 concrete real-world examples, industrial applications, or case studies showing where this is used in actual systems or real-life scenarios.
+## 7. Formal Academic Definition
+Standard accredited textbook definitions with key terminology in **bold**.
 
-## 8. Advantages & Strengths
-List the key benefits, performance improvements, or practical value provided by this concept or approach.
+## 8. Detailed Conceptual Explanation
+In-depth theoretical breakdown of underlying principles, theories, and mechanisms.
 
-## 9. Limitations & Disadvantages
-Discuss constraints, potential bottlenecks, trade-offs, security considerations, or scenarios where alternative approaches are preferred.
+## 9. System Architecture & Working Principles
+How the system/concept is structured, its internal components, and how they interact.
 
-## 10. Practical Applications & Industry Usage
-Describe how engineering teams, scientists, or professionals leverage this knowledge in current industry trends.
+## 10. Step-by-Step Operational Mechanics
+Chronological walkthrough of the operational cycle or algorithm from start to finish.
 
-## 11. Important Points & Key Takeaways
-Provide a high-impact summary checklist of critical points students must memorize for exams.
+## 11. Diagrams & Visual Representations
+CRITICAL DIAGRAM INSTRUCTION:
+- Never generate broken ASCII art or raw text boxes.
+- Provide a clean, valid Mermaid.js diagram fenced inside ```mermaid ... ``` (e.g. flowchart TD, stateDiagram-v2, or graph LR).
+- Follow the Mermaid diagram with a clear textual walkthrough explaining each node, transition, and data path.
 
-## 12. Conclusion & Summary
-Synthesize the entire discussion, summarizing key insights and highlighting future trends or related advanced topics.
+## 12. Mathematical Formulations & Symbol Explanations
+For every mathematical formula or formal specification:
+- Display the equation in clean LaTeX formatting ($...$ inline or $$...$$ display).
+- Provide an explicit Symbol Breakdown Table:
+| Symbol / Notation | Name | Mathematical Meaning | Domain / Permissible Values |
+| :--- | :--- | :--- | :--- |
+- Explain when and why this expression is applied.
 
-## 13. Frequently Asked University Examination Questions (FAQs)
-Provide 4-5 high-yield exam questions (mix of conceptual, analytical, and short-answer questions) complete with concise model answers.
+## 13. Step-by-Step Worked Examples
+At least 2 concrete educational examples:
+- Example 1: Foundational baseline problem with complete step-by-step solution.
+- Example 2: More advanced / multi-step scenario with full trace, intermediate values, and final verification.
+
+## 14. Real-World Applications & Industry Use Cases
+Concrete implementations in modern technology, research, or industrial software.
+
+## 15. Advantages, Trade-offs & Limitations
+Balanced assessment of strengths, bottlenecks, trade-offs, and boundary conditions.
+
+## 16. Comprehensive Comparison Table
+Structured Markdown comparison table contrasting {topic} against alternative approaches, variants, or precursor models.
+
+## 17. Important Properties, Theorems & Formulas
+Cheat-sheet summary of core mathematical properties, lemmas, complexity classes, or invariant theorems.
+
+## 18. Common Student Mistakes & Misconceptions
+Top errors students make in conceptual understanding, problem solving, or exam writing, paired with corrections.
+
+## 19. High-Yield Examination Points
+Essential takeaway points that examiners expect to see in top-scoring university answer scripts.
+
+## 20. Short-Answer Examination Questions & Model Answers
+- 2-Mark Question: Model answer in 2-3 precise sentences.
+- 5-Mark Question: Model answer with bullet points, brief mechanism, and key diagram reference.
+
+## 21. Long-Answer Examination Questions (University Blueprint)
+- 8-Mark Question & Model Answer.
+- 13/16-Mark Comprehensive University Long-Answer Question & Model Answer following the structural blueprint (Introduction, Formal Definition, Block Diagram, Step-by-Step Working, Solved Scenario, Conclusion).
+
+## 22. Quick 60-Second Revision Summary
+Bullet-point rapid review designed for last-minute recall right before an examination.
+
+## 23. Comprehensive Glossary
+Alphabetical glossary of terms, symbols, and concepts covered in these notes.
 
 ---
 ADDITIONAL USER INSTRUCTIONS:
-{additional_instructions if additional_instructions else "Ensure clarity, high academic rigor, and beginner-friendly clarity."}
+{additional_instructions if additional_instructions else "Ensure high pedagogical clarity, zero broken ASCII, and full academic accuracy."}
 
-FORMATTING RULES:
-- Use clean Markdown with clear headings (`#`, `##`, `###`), bullet points, bold highlights, and code/math blocks where appropriate.
-- Be exhaustive, structured, and informative. Avoid shallow placeholders or generic summaries.
+FORMATTING REQUIREMENTS:
+- Use clean Markdown with clear headings (`#`, `##`, `###`), bullet points, bold highlights, LaTeX math (`$...$`), and tables.
+- For diagrams, ALWAYS use valid ```mermaid blocks followed by a textual walkthrough. Never produce raw broken ASCII lines.
+- Be exhaustive, structured, authoritative, and deeply instructional.
 """
-    return _generate_with_fallback(prompt, api_key=api_key, temperature=0.5)
+    return _generate_with_fallback(
+        prompt, 
+        api_key=api_key, 
+        temperature=level_meta["temp"],
+        max_output_tokens=8192
+    )
 
 
 def academic_level_descriptor(year, semester, stream):

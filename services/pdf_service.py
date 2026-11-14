@@ -79,7 +79,7 @@ class NumberedCanvas(canvas.Canvas):
         self.setFont("Helvetica", 7.5)
         self.setFillColor(C_MUTED)
         now_str = datetime.now().strftime("%B %d, %Y")
-        self.drawString(margin, 20, f"Generated with Tessalynt AI  •  {now_str}")
+        self.drawString(margin, 20, f"Generated with Tessalynt AI  |  {now_str}")
 
         # Footer Right: Page X of Y
         page_str = f"Page {self._pageNumber} of {page_count}"
@@ -409,18 +409,18 @@ def build_meta_header(title, subject, topic, stream_or_type, learning_level=None
     col_width = (A4[0] - 72) / 3.0 # 3 equal columns
 
     level_display = (learning_level or "University Academic").replace("_", " ").title()
-    track_display = f"{stream_or_type or 'Higher Education'} • {level_display}" if learning_level else (stream_or_type or "Higher Education")
+    track_display = f"{stream_or_type or 'Higher Education'}  |  {level_display}" if learning_level else (stream_or_type or "Higher Education")
 
     data = [
         [
-            Paragraph("SUBJECT", styles["MetaLabel"]),
-            Paragraph("TOPIC", styles["MetaLabel"]),
-            Paragraph("TRACK / LEARNING LEVEL", styles["MetaLabel"])
+            _safe_paragraph("SUBJECT", styles["MetaLabel"]),
+            _safe_paragraph("TOPIC", styles["MetaLabel"]),
+            _safe_paragraph("TRACK / LEARNING LEVEL", styles["MetaLabel"])
         ],
         [
-            Paragraph(_clean_markdown_to_xml(subject or "General"), styles["MetaValue"]),
-            Paragraph(_clean_markdown_to_xml(topic or "Study Material"), styles["MetaValue"]),
-            Paragraph(_clean_markdown_to_xml(track_display), styles["MetaValue"])
+            _safe_paragraph(_clean_markdown_to_xml(subject or "General"), styles["MetaValue"]),
+            _safe_paragraph(_clean_markdown_to_xml(topic or "Study Material"), styles["MetaValue"]),
+            _safe_paragraph(_clean_markdown_to_xml(track_display), styles["MetaValue"])
         ]
     ]
 
@@ -478,8 +478,8 @@ def markdown_to_flowables(md_text, styles):
                 # Render clean diagram indicator with structured flowchart text
                 flowables.append(Spacer(1, 4))
                 diag_box = [
-                    [Paragraph("<b>VISUAL WORKFLOW / DIAGRAM ARCHITECTURE</b>", styles["MetaLabel"])],
-                    [Paragraph("<font face='Courier' color='#312E81'>" + "<br/>".join(_clean_markdown_to_xml(l) for l in code_lines if l.strip()) + "</font>", styles["TableCell"])]
+                    [_safe_paragraph("<b>VISUAL WORKFLOW / DIAGRAM ARCHITECTURE</b>", styles["MetaLabel"])],
+                    [_safe_paragraph("<font face='Courier' color='#312E81'>" + "<br/>".join(_clean_markdown_to_xml(l) for l in code_lines if l.strip()) + "</font>", styles["TableCell"])]
                 ]
                 t_diag = Table(diag_box, colWidths=[A4[0] - 72])
                 t_diag.setStyle(TableStyle([
@@ -497,7 +497,7 @@ def markdown_to_flowables(md_text, styles):
                 # Regular code block
                 flowables.append(Spacer(1, 3))
                 code_content = "<br/>".join(_clean_markdown_to_xml(l) for l in code_lines)
-                t_code = Table([[Paragraph(code_content, styles["CodeText"])]], colWidths=[A4[0] - 72])
+                t_code = Table([[_safe_paragraph(code_content, styles["CodeText"])]], colWidths=[A4[0] - 72])
                 t_code.setStyle(TableStyle([
                     ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#F1F5F9")),
                     ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E1")),

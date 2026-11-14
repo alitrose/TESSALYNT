@@ -294,7 +294,8 @@ def generate_academic_notes(stream, department, year, semester, subject, topic,
 - Demystify mathematical expressions: explain what each formula means in plain English sentences before showing the equation.
 - Provide simple, gradual worked examples with every step clearly explained.
 - Emphasize WHY this concept was invented and what problem it solves.
-- Tone should make the student feel capable and eliminate academic anxiety."""
+- Tone should make the student feel capable and eliminate academic anxiety.
+- In Section 21, provide a comprehensive Long-Answer Conceptual Walkthrough Question & Model Answer (explaining the simulation concept step-by-step in intuitive language)."""
     elif level_key == "exam":
         level_guide = """### LEVEL 3: EXAM PREPARATION FOCUS:
 - Structure content around university examination patterns and mark allocations.
@@ -421,11 +422,10 @@ Essential takeaway points that examiners expect to see in top-scoring university
 
 ## 20. Short-Answer Examination Questions & Model Answers
 - 2-Mark Question: Model answer in 2-3 precise sentences.
-- 5-Mark Question: Model answer with bullet points, brief mechanism, and key diagram reference.
+- 5-Mark Question: Structured model answer with key bullet points.
 
-## 21. Long-Answer Examination Questions (University Blueprint)
-- 8-Mark Question & Model Answer.
-- 13/16-Mark Comprehensive University Long-Answer Question & Model Answer following the structural blueprint (Introduction, Formal Definition, Block Diagram, Step-by-Step Working, Solved Scenario, Conclusion).
+## 21. Long-Answer Conceptual / Examination Question
+- Provide ONE comprehensive model answer tailored to the selected learning level (for Beginner: intuitive conceptual walkthrough; for Academic/Exam: structured university 16-mark blueprint covering Introduction, Formal Definition, System Architecture, Working & Derivation, Solved Scenario, Conclusion).
 
 ## 22. Quick 60-Second Revision Summary
 Bullet-point rapid review designed for last-minute recall right before an examination.
@@ -438,7 +438,7 @@ CONCISENESS & PACING DIRECTIVE (CRITICAL FOR LIVE EXAM READINESS)
 ================================================================================
 - Cover all 23 syllabus sections systematically, concisely, and completely.
 - In Section 20, provide exactly 1 distinct 2-mark question with concise model answer and 1 distinct 5-mark question with structured model answer.
-- In Section 21, provide ONE comprehensive 16-mark long-answer model blueprint question with a focused, structured model answer covering the 6 parts.
+- In Section 21, provide ONE comprehensive model answer tailored to the level (do not generate multiple redundant long essays).
 - ALWAYS conclude completely with Section 22 (Quick 60-Second Revision Summary) and Section 23 (Comprehensive Glossary). Never leave sections truncated.
 - Maintain crisp, dense prose so that all 23 sections are fully delivered within approximately 2,200 to 2,800 words.
 
@@ -455,7 +455,7 @@ FORMATTING REQUIREMENTS:
         prompt, 
         api_key=api_key, 
         temperature=level_meta["temp"],
-        max_output_tokens=5500
+        max_output_tokens=6500
     )
 
 

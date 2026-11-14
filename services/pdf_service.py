@@ -253,18 +253,21 @@ def get_tessalynt_styles():
     return styles
 
 
+def _safe_paragraph(text, style):
+    """Creates a ReportLab Paragraph, safely falling back to plain escaped text if XML parsing fails."""
+    try:
+        return Paragraph(text, style)
+    except Exception:
+        plain_text = re.sub(r"<[^>]+>", "", text)
+        safe_plain = plain_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        return Paragraph(safe_plain, style)
+
+
 def _clean_markdown_to_xml(text):
     """Escapes XML entities and transforms Markdown inline syntax into ReportLab tags."""
     if not text:
         return ""
-    
-    # 1. First convert LaTeX math delimiters to clean readable forms before XML escaping
-    # Display math $$ ... $$
-    text = re.sub(r"\$\$([\s\S]*?)\$\$", r"[Math: \1]", text)
-    # Inline math $ ... $
-    text = re.sub(r"\$([^\$\n]+?)\$", r"|\1|", text)
-    
-    # Common LaTeX symbol conversions for readable PDF
+
     replacements = {
         "\\delta": "δ",
         "\\Sigma": "Σ",
@@ -300,23 +303,57 @@ def _clean_markdown_to_xml(text):
         "\\lambda": "λ",
         "\\pi": "π"
     }
-    for sym, char in replacements.items():
-        text = text.replace(sym, char)
 
-    # XML entity replacements
+    placeholders = []
+    def store_token(val):
+        idx = len(placeholders)
+        token = f"QQQTESSTOKEN{idx}ZZZ"
+        placeholders.append((token, val))
+        return token
+
+    # 1. Extract Display Math $$ ... $$
+    def replace_display_math(match):
+        inner = match.group(1).strip()
+        for sym, char in replacements.items():
+            inner = inner.replace(sym, char)
+        safe_inner = inner.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        return store_token(f"<b>[Math: {safe_inner}]</b>")
+
+    text = re.sub(r"\$\$([\s\S]*?)\$\$", replace_display_math, text)
+
+    # 2. Extract Inline Math $ ... $
+    def replace_inline_math(match):
+        inner = match.group(1).strip()
+        for sym, char in replacements.items():
+            inner = inner.replace(sym, char)
+        safe_inner = inner.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        return store_token(f"<i><b>{safe_inner}</b></i>")
+
+    text = re.sub(r"\$([^\$\n]+?)\$", replace_inline_math, text)
+
+    # 3. Extract Inline Code ` ... `
+    def replace_inline_code(match):
+        inner = match.group(1)
+        safe_inner = inner.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        return store_token(f'<font face="Courier" color="#4F46E5">{safe_inner}</font>')
+
+    text = re.sub(r"`([^`\n]+?)`", replace_inline_code, text)
+
+    # 4. XML entity replacement for remaining prose
     text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-    # Re-wrap inline math placeholder |...| in clean italics
-    text = re.sub(r"\|([^\|\n]+?)\|", r"<i><b>\1</b></i>", text)
-
-    # Bold **text** or __text__
+    # 5. Bold **text** or __text__
     text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
     text = re.sub(r"__(.+?)__", r"<b>\1</b>", text)
-    # Italic *text* or _text_
+
+    # 6. Italic *text* or _text_
     text = re.sub(r"\*(.+?)\*", r"<i>\1</i>", text)
     text = re.sub(r"(?<!\w)_(.+?)_(?!\w)", r"<i>\1</i>", text)
-    # Inline code `code`
-    text = re.sub(r"`(.+?)`", r'<font face="Courier" color="#4F46E5">\1</font>', text)
+
+    # 7. Restore tokens in order
+    for token, val in placeholders:
+        text = text.replace(token, val)
+
     return text
 
 
@@ -343,9 +380,9 @@ def _parse_markdown_table(table_lines, styles):
         for cell in padded:
             clean_cell = _clean_markdown_to_xml(cell)
             if idx == 0:
-                p = Paragraph(f"<b>{clean_cell}</b>", styles["TableHeader"])
+                p = _safe_paragraph(f"<b>{clean_cell}</b>", styles["TableHeader"])
             else:
-                p = Paragraph(clean_cell, styles["TableCell"])
+                p = _safe_paragraph(clean_cell, styles["TableCell"])
             row_paras.append(p)
         normalized_rows.append(row_paras)
 
@@ -476,34 +513,34 @@ def markdown_to_flowables(md_text, styles):
         # 3. Headings
         if line.startswith("# "):
             heading_text = _clean_markdown_to_xml(line[2:].strip())
-            flowables.append(Paragraph(heading_text, styles["Title"]))
+            flowables.append(_safe_paragraph(heading_text, styles["Title"]))
             flowables.append(Spacer(1, 4))
         elif line.startswith("## "):
             heading_text = _clean_markdown_to_xml(line[3:].strip())
-            flowables.append(Paragraph(heading_text, styles["Heading1"]))
+            flowables.append(_safe_paragraph(heading_text, styles["Heading1"]))
             flowables.append(HRFlowable(width="100%", thickness=0.5, color=C_BORDER, spaceBefore=1, spaceAfter=4))
         elif line.startswith("### "):
             heading_text = _clean_markdown_to_xml(line[4:].strip())
-            flowables.append(Paragraph(heading_text, styles["Heading2"]))
+            flowables.append(_safe_paragraph(heading_text, styles["Heading2"]))
         elif line.startswith("#### "):
             heading_text = _clean_markdown_to_xml(line[5:].strip())
-            flowables.append(Paragraph(heading_text, styles["Heading3"]))
+            flowables.append(_safe_paragraph(heading_text, styles["Heading3"]))
         elif line.startswith("- ") or line.startswith("* ") or line.startswith("• "):
             bullet_text = _clean_markdown_to_xml(line[2:].strip())
-            flowables.append(Paragraph(f"&bull;&nbsp;&nbsp;{bullet_text}", styles["Bullet"]))
+            flowables.append(_safe_paragraph(f"&bull;&nbsp;&nbsp;{bullet_text}", styles["Bullet"]))
         elif re.match(r"^\d+\.\s+", line):
             num_match = re.match(r"^(\d+\.)\s+(.+)$", line)
             if num_match:
                 prefix = num_match.group(1)
                 content = _clean_markdown_to_xml(num_match.group(2))
-                flowables.append(Paragraph(f"<b>{prefix}</b>&nbsp;&nbsp;{content}", styles["Bullet"]))
+                flowables.append(_safe_paragraph(f"<b>{prefix}</b>&nbsp;&nbsp;{content}", styles["Bullet"]))
             else:
-                flowables.append(Paragraph(_clean_markdown_to_xml(line), styles["Body"]))
+                flowables.append(_safe_paragraph(_clean_markdown_to_xml(line), styles["Body"]))
         elif line.startswith("---") or line.startswith("***"):
             flowables.append(HRFlowable(width="100%", thickness=0.75, color=C_BORDER, spaceBefore=4, spaceAfter=6))
         elif line.startswith(">"):
             callout_text = _clean_markdown_to_xml(line.lstrip("> ").strip())
-            t = Table([[Paragraph(f"<b>Note:</b> {callout_text}", styles["Callout"])]], colWidths=[A4[0] - 72])
+            t = Table([[_safe_paragraph(f"<b>Note:</b> {callout_text}", styles["Callout"])]], colWidths=[A4[0] - 72])
             t.setStyle(TableStyle([
                 ('BACKGROUND', (0,0), (-1,-1), C_CARD_BG),
                 ('LEFTPADDING', (0,0), (-1,-1), 10),
@@ -516,7 +553,7 @@ def markdown_to_flowables(md_text, styles):
             flowables.append(Spacer(1, 4))
         else:
             clean_p = _clean_markdown_to_xml(line)
-            flowables.append(Paragraph(clean_p, styles["Body"]))
+            flowables.append(_safe_paragraph(clean_p, styles["Body"]))
 
         i += 1
     return flowables

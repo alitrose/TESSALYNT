@@ -116,7 +116,7 @@ def test_api_connection(api_key=None):
     raise GeminiGenerationError(f"Could not connect to Gemini API using any supported model. Errors: {'; '.join(errors[:3])}")
 
 
-def _generate_with_fallback(prompt, api_key=None, temperature=0.5):
+def _generate_with_fallback(prompt, api_key=None, temperature=0.5, response_mime_type=None):
     """Generates text content using modern google.genai SDK with automatic model fallback."""
     global _ACTIVE_WORKING_MODEL
     key = get_active_api_key(api_key)
@@ -135,10 +135,14 @@ def _generate_with_fallback(prompt, api_key=None, temperature=0.5):
         from google.genai import types
         for model_name in models_to_try[:3]:
             try:
-                config = types.GenerateContentConfig(
-                    temperature=temperature,
-                    max_output_tokens=4096
-                )
+                config_kwargs = {
+                    "temperature": temperature,
+                    "max_output_tokens": 4096
+                }
+                if response_mime_type:
+                    config_kwargs["response_mime_type"] = response_mime_type
+
+                config = types.GenerateContentConfig(**config_kwargs)
                 response = client.models.generate_content(
                     model=model_name,
                     contents=prompt,
@@ -167,10 +171,13 @@ def _generate_with_fallback(prompt, api_key=None, temperature=0.5):
         legacy_genai.configure(api_key=key)
         for model_name in models_to_try[:2]:
             try:
-                gen_config = legacy_genai.types.GenerationConfig(
-                    temperature=temperature,
-                    max_output_tokens=4096
-                )
+                legacy_kwargs = {
+                    "temperature": temperature,
+                    "max_output_tokens": 4096
+                }
+                if response_mime_type:
+                    legacy_kwargs["response_mime_type"] = response_mime_type
+                gen_config = legacy_genai.types.GenerationConfig(**legacy_kwargs)
                 model = legacy_genai.GenerativeModel(
                     model_name=model_name,
                     generation_config=gen_config
@@ -190,33 +197,53 @@ def _generate_with_fallback(prompt, api_key=None, temperature=0.5):
 
 
 def clean_json_response(raw_text):
-    """Extracts and parses JSON from markdown-wrapped LLM responses."""
+    """Extracts and parses JSON from LLM responses with robust error recovery."""
     text = raw_text.strip()
-    # Strip markdown code blocks if present
+    # 1. Strip markdown code blocks if present
     code_block_match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", text, re.IGNORECASE)
     if code_block_match:
         text = code_block_match.group(1).strip()
     
-    # Try direct parse
+    # 2. Try direct parse with strict=False (allows literal newlines inside strings)
     try:
-        return json.loads(text)
-    except json.JSONDecodeError:
+        return json.loads(text, strict=False)
+    except Exception:
         pass
 
-    # Try to find JSON array or object inside text
-    array_match = re.search(r"\[\s*\{[\s\S]*\}\s*\]", text)
-    if array_match:
-        try:
-            return json.loads(array_match.group(0))
-        except json.JSONDecodeError:
-            pass
+    # 3. Try removing trailing commas
+    no_trailing = re.sub(r",\s*([\]}])", r"\1", text)
+    try:
+        return json.loads(no_trailing, strict=False)
+    except Exception:
+        pass
 
-    object_match = re.search(r"\{[\s\S]*\}", text)
-    if object_match:
+    # 4. Try extracting array between first '[' and last ']'
+    start_arr = text.find('[')
+    end_arr = text.rfind(']')
+    if start_arr != -1 and end_arr != -1 and end_arr > start_arr:
+        arr_str = text[start_arr:end_arr + 1]
         try:
-            return json.loads(object_match.group(0))
-        except json.JSONDecodeError:
-            pass
+            return json.loads(arr_str, strict=False)
+        except Exception:
+            arr_clean = re.sub(r",\s*([\]}])", r"\1", arr_str)
+            try:
+                return json.loads(arr_clean, strict=False)
+            except Exception:
+                pass
+
+    # 5. Try extracting object between first '{' and last '}'
+    start_obj = text.find('{')
+    end_obj = text.rfind('}')
+    if start_obj != -1 and end_obj != -1 and end_obj > start_obj:
+        obj_str = text[start_obj:end_obj + 1]
+        try:
+            return json.loads(obj_str, strict=False)
+        except Exception:
+            obj_clean = re.sub(r",\s*([\]}])", r"\1", obj_str)
+            try:
+                return json.loads(obj_clean, strict=False)
+            except Exception:
+                pass
 
     raise ValueError("Could not parse valid JSON from AI response.")
 
@@ -392,7 +419,7 @@ Each object in the array must follow this exact schema:
   }}
 ]
 """
-    raw_response = _generate_with_fallback(prompt, api_key=api_key, temperature=0.3)
+    raw_response = _generate_with_fallback(prompt, api_key=api_key, temperature=0.3, response_mime_type="application/json")
     parsed = clean_json_response(raw_response)
     if not isinstance(parsed, list) or len(parsed) == 0:
         raise ValueError("AI response did not contain a valid list of MCQ items.")
@@ -466,7 +493,7 @@ Schema:
   }}
 ]
 """
-    raw_response = _generate_with_fallback(prompt, api_key=api_key, temperature=0.4)
+    raw_response = _generate_with_fallback(prompt, api_key=api_key, temperature=0.4, response_mime_type="application/json")
     parsed = clean_json_response(raw_response)
     if not isinstance(parsed, list) or len(parsed) == 0:
         raise ValueError("AI response did not contain a valid list of flashcards.")

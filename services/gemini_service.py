@@ -436,10 +436,11 @@ Alphabetical glossary of terms, symbols, and concepts covered in these notes.
 ================================================================================
 CONCISENESS & PACING DIRECTIVE (CRITICAL FOR LIVE EXAM READINESS)
 ================================================================================
-- Cover all 23 syllabus sections systematically and thoroughly, but maintain high density and crisp prose.
+- Cover all 23 syllabus sections systematically, concisely, and completely.
 - In Section 20, provide exactly 1 distinct 2-mark question with concise model answer and 1 distinct 5-mark question with structured model answer.
-- In Section 21, provide ONE comprehensive 16-mark long-answer model blueprint question (with the 6 structural parts) and ONE 8-mark comparative question.
-- Keep the overall length dense, authoritative, and structured between 1,600 and 2,400 words so that generation completes rapidly and reliably without timeouts.
+- In Section 21, provide ONE comprehensive 16-mark long-answer model blueprint question with a focused, structured model answer covering the 6 parts.
+- ALWAYS conclude completely with Section 22 (Quick 60-Second Revision Summary) and Section 23 (Comprehensive Glossary). Never leave sections truncated.
+- Maintain crisp, dense prose so that all 23 sections are fully delivered within approximately 2,200 to 2,800 words.
 
 ---
 ADDITIONAL USER INSTRUCTIONS:
@@ -454,7 +455,7 @@ FORMATTING REQUIREMENTS:
         prompt, 
         api_key=api_key, 
         temperature=level_meta["temp"],
-        max_output_tokens=4096
+        max_output_tokens=5500
     )
 
 

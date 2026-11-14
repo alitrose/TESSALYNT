@@ -177,7 +177,15 @@ def api_debug_models():
         from google import genai as modern_genai
         client = modern_genai.Client(api_key=api_key)
         test_modern = {}
-        for m in ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.8-flash", "gemma-4-26b-a4b-it"]:
+        for m in [
+            "gemini-3.5-flash",
+            "gemini-3.5-flash-lite",
+            "gemini-3.6-flash",
+            "gemini-3.7-flash",
+            "gemini-3.1-flash-lite",
+            "gemma-4-26b-a4b-it",
+            "gemma-4-31b-it"
+        ]:
             try:
                 res = client.models.generate_content(model=m, contents="Say 'ok'")
                 test_modern[m] = {"ok": True, "text": res.text[:50] if res.text else "No text"}
@@ -186,22 +194,6 @@ def api_debug_models():
         report["modern_sdk_test"] = test_modern
     except Exception as e:
         report["modern_sdk_error"] = str(e)
-
-    # Test generation with legacy google.generativeai SDK
-    try:
-        import google.generativeai as legacy_genai
-        legacy_genai.configure(api_key=api_key)
-        test_legacy = {}
-        for m in ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.8-flash", "gemma-4-26b-a4b-it"]:
-            try:
-                mod = legacy_genai.GenerativeModel(m)
-                res = mod.generate_content("Say 'ok'", request_options={"timeout": 15})
-                test_legacy[m] = {"ok": True, "text": res.text[:50] if res.text else "No text"}
-            except Exception as e:
-                test_legacy[m] = {"ok": False, "error": str(e)}
-        report["legacy_sdk_test"] = test_legacy
-    except Exception as e:
-        report["legacy_sdk_error"] = str(e)
 
     return jsonify(report)
 

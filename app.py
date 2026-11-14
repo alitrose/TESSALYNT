@@ -165,37 +165,27 @@ def about_page():
 # API ENDPOINTS
 # ==========================================
 
-@app.route("/api/debug-models", methods=["GET"])
-def api_debug_models():
+@app.route("/api/probe", methods=["GET"])
+def api_probe():
+    model_name = request.args.get("model", "gemini-3.5-flash-lite")
     api_key = get_effective_api_key()
     if not api_key:
-        return jsonify({"error": "No API key configured"}), 400
-    report = {}
-    
-    # Test generation with modern google.genai SDK
+        return jsonify({"success": False, "error": "No API key configured"}), 400
     try:
-        from google import genai as modern_genai
-        client = modern_genai.Client(api_key=api_key)
-        test_modern = {}
-        for m in [
-            "gemini-3.5-flash",
-            "gemini-3.5-flash-lite",
-            "gemini-3.6-flash",
-            "gemini-3.7-flash",
-            "gemini-3.1-flash-lite",
-            "gemma-4-26b-a4b-it",
-            "gemma-4-31b-it"
-        ]:
-            try:
-                res = client.models.generate_content(model=m, contents="Say 'ok'")
-                test_modern[m] = {"ok": True, "text": res.text[:50] if res.text else "No text"}
-            except Exception as e:
-                test_modern[m] = {"ok": False, "error": str(e)}
-        report["modern_sdk_test"] = test_modern
+        from google import genai
+        client = genai.Client(api_key=api_key)
+        res = client.models.generate_content(model=model_name, contents="Reply with 'PROBE_OK'")
+        return jsonify({
+            "success": True,
+            "model": model_name,
+            "text": res.text.strip() if res.text else "No text"
+        })
     except Exception as e:
-        report["modern_sdk_error"] = str(e)
-
-    return jsonify(report)
+        return jsonify({
+            "success": False,
+            "model": model_name,
+            "error": str(e)
+        }), 200
 
 
 @app.route("/api/status", methods=["GET"])

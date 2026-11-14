@@ -437,6 +437,7 @@ Alphabetical glossary of terms, symbols, and concepts covered in these notes.
 CONCISENESS & PACING DIRECTIVE (CRITICAL FOR LIVE EXAM READINESS)
 ================================================================================
 - Cover all 23 syllabus sections systematically, concisely, and completely.
+- In Section 13 (Worked Examples), provide 2 concise, step-by-step worked examples (150-250 words each). Avoid over-lengthy manual traces.
 - In Section 20, provide exactly 1 distinct 2-mark question with concise model answer and 1 distinct 5-mark question with structured model answer.
 - In Section 21, provide ONE comprehensive model answer tailored to the level (do not generate multiple redundant long essays).
 - ALWAYS conclude completely with Section 22 (Quick 60-Second Revision Summary) and Section 23 (Comprehensive Glossary). Never leave sections truncated.
@@ -455,7 +456,7 @@ FORMATTING REQUIREMENTS:
         prompt, 
         api_key=api_key, 
         temperature=level_meta["temp"],
-        max_output_tokens=6500
+        max_output_tokens=8192
     )
 
 

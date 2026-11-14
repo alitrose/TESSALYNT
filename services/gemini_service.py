@@ -433,6 +433,14 @@ Bullet-point rapid review designed for last-minute recall right before an examin
 ## 23. Comprehensive Glossary
 Alphabetical glossary of terms, symbols, and concepts covered in these notes.
 
+================================================================================
+CONCISENESS & PACING DIRECTIVE (CRITICAL FOR LIVE EXAM READINESS)
+================================================================================
+- Cover all 23 syllabus sections systematically and thoroughly, but maintain high density and crisp prose.
+- In Section 20, provide exactly 1 distinct 2-mark question with concise model answer and 1 distinct 5-mark question with structured model answer.
+- In Section 21, provide ONE comprehensive 16-mark long-answer model blueprint question (with the 6 structural parts) and ONE 8-mark comparative question.
+- Keep the overall length dense, authoritative, and structured between 1,600 and 2,400 words so that generation completes rapidly and reliably without timeouts.
+
 ---
 ADDITIONAL USER INSTRUCTIONS:
 {additional_instructions if additional_instructions else "Ensure high pedagogical clarity, zero broken ASCII, and full academic accuracy."}
@@ -446,7 +454,7 @@ FORMATTING REQUIREMENTS:
         prompt, 
         api_key=api_key, 
         temperature=level_meta["temp"],
-        max_output_tokens=8192
+        max_output_tokens=4096
     )
 
 

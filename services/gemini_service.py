@@ -15,12 +15,41 @@ logger = logging.getLogger(__name__)
 
 # Model fallback cascade
 CANDIDATE_MODELS = [
+    "gemini-3.8-flash",
+    "gemini-3.8-pro",
     "gemini-2.5-flash",
     "gemini-2.0-flash",
     "gemini-1.5-flash",
     "gemini-1.5-pro",
     "gemini-pro"
 ]
+
+
+def get_candidate_models(genai_client):
+    """Dynamically queries available models from Gemini API or falls back to prioritized list."""
+    try:
+        remote_models = [
+            m.name.replace("models/", "")
+            for m in genai_client.list_models()
+            if "generateContent" in getattr(m, "supported_generation_methods", [])
+        ]
+        if remote_models:
+            priority_order = [
+                "gemini-3.8-flash",
+                "gemini-3.8-pro",
+                "gemini-2.5-flash",
+                "gemini-2.0-flash",
+                "gemini-1.5-flash",
+                "gemini-1.5-pro",
+                "gemini-pro"
+            ]
+            ordered = [m for m in priority_order if m in remote_models]
+            ordered += [m for m in remote_models if m not in ordered]
+            return ordered
+    except Exception as e:
+        logger.warning(f"Could not list models dynamically: {e}")
+
+    return CANDIDATE_MODELS
 
 
 class GeminiAuthError(Exception):
@@ -55,8 +84,9 @@ def get_configured_genai_client(api_key=None):
 def test_api_connection(api_key=None):
     """Tests the API connection and returns the working model name."""
     genai = get_configured_genai_client(api_key)
+    candidate_models = get_candidate_models(genai)
     errors = []
-    for model_name in CANDIDATE_MODELS:
+    for model_name in candidate_models:
         try:
             model = genai.GenerativeModel(model_name)
             response = model.generate_content("Ping. Reply with 'PONG'")
@@ -72,9 +102,10 @@ def test_api_connection(api_key=None):
 def _generate_with_fallback(prompt, api_key=None, temperature=0.7):
     """Generates text content with automatic model fallback."""
     genai = get_configured_genai_client(api_key)
+    candidate_models = get_candidate_models(genai)
     last_error = None
 
-    for model_name in CANDIDATE_MODELS:
+    for model_name in candidate_models:
         try:
             generation_config = genai.types.GenerationConfig(
                 temperature=temperature,

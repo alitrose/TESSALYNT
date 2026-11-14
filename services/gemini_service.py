@@ -13,6 +13,9 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+# Cached active model to avoid retrying failing models on every request
+_ACTIVE_WORKING_MODEL = None
+
 # Model fallback cascade
 CANDIDATE_MODELS = [
     "gemini-3.8-flash",
@@ -83,14 +86,23 @@ def get_configured_genai_client(api_key=None):
 
 def test_api_connection(api_key=None):
     """Tests the API connection and returns the working model name."""
+    global _ACTIVE_WORKING_MODEL
     genai = get_configured_genai_client(api_key)
     candidate_models = get_candidate_models(genai)
+
+    # Prioritize already working model if available
+    models_to_test = []
+    if _ACTIVE_WORKING_MODEL and _ACTIVE_WORKING_MODEL in candidate_models:
+        models_to_test.append(_ACTIVE_WORKING_MODEL)
+    models_to_test += [m for m in candidate_models if m not in models_to_test]
+
     errors = []
-    for model_name in candidate_models:
+    for model_name in models_to_test:
         try:
             model = genai.GenerativeModel(model_name)
-            response = model.generate_content("Ping. Reply with 'PONG'")
+            response = model.generate_content("Ping. Reply with 'PONG'", request_options={"timeout": 15})
             if response and response.text:
+                _ACTIVE_WORKING_MODEL = model_name
                 return {"status": "ok", "model": model_name, "message": "Connection successful"}
         except Exception as e:
             errors.append(f"{model_name}: {str(e)}")
@@ -100,24 +112,46 @@ def test_api_connection(api_key=None):
 
 
 def _generate_with_fallback(prompt, api_key=None, temperature=0.7):
-    """Generates text content with automatic model fallback."""
+    """Generates text content with automatic model fallback and timeout safeguards."""
+    global _ACTIVE_WORKING_MODEL
     genai = get_configured_genai_client(api_key)
     candidate_models = get_candidate_models(genai)
-    last_error = None
 
-    for model_name in candidate_models:
+    # Prioritize active working model first
+    models_to_try = []
+    if _ACTIVE_WORKING_MODEL:
+        models_to_try.append(_ACTIVE_WORKING_MODEL)
+    for m in candidate_models:
+        if m not in models_to_try:
+            models_to_try.append(m)
+
+    last_error = None
+    # Limit number of models to try in fallback to avoid HTTP timeouts (maximum 4 models)
+    for model_name in models_to_try[:4]:
         try:
             generation_config = genai.types.GenerationConfig(
                 temperature=temperature,
-                max_output_tokens=8192
+                max_output_tokens=4096
             )
             model = genai.GenerativeModel(
                 model_name=model_name,
                 generation_config=generation_config
             )
-            response = model.generate_content(prompt)
-            if response and response.text:
-                return response.text
+            response = model.generate_content(prompt, request_options={"timeout": 45})
+            
+            # Safe text extraction handling potential safety blocks
+            text = None
+            try:
+                text = response.text
+            except Exception:
+                if getattr(response, "candidates", None) and response.candidates[0].content.parts:
+                    text = "".join(part.text for part in response.candidates[0].content.parts if hasattr(part, "text"))
+
+            if text and text.strip():
+                _ACTIVE_WORKING_MODEL = model_name
+                logger.info(f"Successfully generated content using model: {model_name}")
+                return text.strip()
+
         except Exception as e:
             last_error = e
             logger.warning(f"Model {model_name} failed: {e}. Trying fallback...")

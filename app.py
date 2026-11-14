@@ -165,6 +165,36 @@ def about_page():
 # API ENDPOINTS
 # ==========================================
 
+@app.route("/api/debug-models", methods=["GET"])
+def api_debug_models():
+    api_key = get_effective_api_key()
+    if not api_key:
+        return jsonify({"error": "No API key configured"}), 400
+    report = {}
+    # 1. Test google.generativeai
+    try:
+        import google.generativeai as legacy_genai
+        legacy_genai.configure(api_key=api_key)
+        gen_models = [
+            m.name for m in legacy_genai.list_models() 
+            if "generateContent" in getattr(m, "supported_generation_methods", [])
+        ]
+        report["legacy_sdk_models"] = gen_models
+    except Exception as e:
+        report["legacy_sdk_error"] = str(e)
+
+    # 2. Test google.genai
+    try:
+        from google import genai as modern_genai
+        client = modern_genai.Client(api_key=api_key)
+        modern_models = [m.name for m in client.models.list()]
+        report["modern_sdk_models"] = modern_models
+    except Exception as e:
+        report["modern_sdk_error"] = str(e)
+
+    return jsonify(report)
+
+
 @app.route("/api/status", methods=["GET"])
 def api_status():
     """Returns API readiness status and configured models."""
